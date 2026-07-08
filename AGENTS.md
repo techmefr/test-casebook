@@ -229,6 +229,8 @@ Type every stub / handler to the real signature (Pass B step 3) — a stub that 
 - treat third-party components and the framework runtime as trusted boundaries — assert on **your** inputs to them and **your** handling of their outputs, not their internals;
 - exclude framework / vendor / generated code from coverage (`coverage.exclude`) so the 90% measures only the code you wrote.
 
+**Some effects aren't observable at unit level — send them to E2E, don't fake them.** A headless DOM (jsdom / happy-dom) does not compute layout or fully apply styling: CSS custom properties injected via `v-bind()` / `useCssVars`, values from real stylesheets, geometry, and paint are not serialized. If a case's only observable effect is one of these (e.g. a `fontSize` prop that just feeds a CSS variable), it **cannot** be asserted in a unit test. Do not select on a rendered style that the runner never produced, and do not invent a passing assertion. Cover the prop's *render* branches at unit level, assert the visual effect in **E2E**, and leave a one-line note on the skipped unit assertion per Step 5.0 — the same honesty rule as a genuinely unreachable path.
+
 ### Step 5.2 — Permission-gated units: the persona matrix
 
 When a unit's behaviour depends on **who** the current user is — a role, a permission, an ownership / tenant / scope check — one happy-path user is not a test. This is the single biggest source of escaped bugs, because a harness that always authenticates as the same user (or only ever mints single-role users) never exercises the other actors. Apply this whenever Step 5.0 flagged an authorization gate.
