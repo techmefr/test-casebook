@@ -9,9 +9,15 @@ It pairs with [`env-attr-cleaner`](https://github.com/techmefr/env-attr-cleaner)
 ## What's inside
 
 - **`AGENTS.md`** — the playbook. Handed to an AI coding agent, it drives: detect the stack, (optionally) wire the cleaner, plan every case in `task-test.md`, execute block by block with a reviewer, enforce strict typing and coverage, and verify. Includes the persona matrix for permission-gated units and the anti-mock-drift rules.
+- **`.claude/skills/test-task/`** — *(project manager, upstream)* turns a story into a shared **`test-task.md`**: interviews to close gaps (personas, gated capabilities, regression surface) and reads the real permission model, so the contract is complete before dev.
+- **`.claude/skills/test-casebook/`** + **`.claude/agents/{test-writer,test-reviewer}`** — *(developer, downstream)* executes that contract on the code — plan per unit, write, review, verify.
 - **`docs/strategy.md`** — why `data-test-*` over CSS / structural / text selectors.
 - **`docs/conventions.md`** — naming rules for `data-test-id` / `data-test-class`.
 - **`docs/testing-guide/`** — ready-to-use scenario snippets.
+
+## The flow
+
+Story → **`test-task` skill** (PM) writes one `test-task.md` → given to the front **and** back developer → each runs the **`test-casebook` skill** on their side, deriving expected outcomes from that same `test-task.md`. One contract, two implementations; permission cases assert both layers, so a front/back divergence surfaces immediately.
 
 ## Core idea
 
