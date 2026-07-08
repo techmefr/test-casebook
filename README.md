@@ -23,13 +23,13 @@ The playbook's job is to make coverage **exhaustive instead of happy-path**: pla
 
 Three channels, **one source of truth** (this repo's `AGENTS.md` + docs), never re-authored per channel:
 
-- **npx scaffolder** — `npx test-casebook init` drops the playbook + config into any project (agent-agnostic). *Planned.*
-- **Claude Code plugin** — the skill + sub-agents (writer / reviewer). *Planned.*
+- **Claude Code skill + sub-agents** — `.claude/skills/test-casebook/` orchestrates the run; `.claude/agents/test-writer` and `.claude/agents/test-reviewer` execute and gate each block. Open the repo (or a project it's been scaffolded into) in Claude Code and invoke the `test-casebook` skill.
+- **npx scaffolder** — `npx test-casebook init` drops the playbook + docs + `.claude/` into any project (agent-agnostic). *Planned.*
 - **Docs** — the guides in `docs/`.
 
 ## Status
 
-Pre-release. The playbook and docs are usable today by handing `AGENTS.md` to an agent; the scaffolder and plugin are in progress.
+Pre-release. Usable today via the Claude Code skill, or by handing `AGENTS.md` to any agent; the npx scaffolder and marketplace packaging are in progress.
 
 ## License
 
