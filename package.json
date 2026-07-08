@@ -1,0 +1,30 @@
+{
+    "name": "test-casebook",
+    "version": "0.0.0",
+    "description": "Testing methodology and AI-agent playbook for exhaustive, data-test-driven test suites",
+    "author": "techmefr",
+    "license": "MIT",
+    "homepage": "https://github.com/techmefr/test-casebook#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/techmefr/test-casebook.git"
+    },
+    "bugs": {
+        "url": "https://github.com/techmefr/test-casebook/issues"
+    },
+    "keywords": [
+        "testing",
+        "test-automation",
+        "ai-agents",
+        "claude-code",
+        "playwright",
+        "vitest",
+        "methodology",
+        "data-attributes",
+        "e2e"
+    ],
+    "files": [
+        "AGENTS.md",
+        "docs"
+    ]
+}
