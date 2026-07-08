@@ -4,6 +4,10 @@
     "description": "Testing methodology and AI-agent playbook for exhaustive, data-test-driven test suites",
     "author": "techmefr",
     "license": "MIT",
+    "type": "module",
+    "bin": {
+        "test-casebook": "bin/test-casebook.mjs"
+    },
     "homepage": "https://github.com/techmefr/test-casebook#readme",
     "repository": {
         "type": "git",
@@ -25,6 +29,8 @@
     ],
     "files": [
         "AGENTS.md",
-        "docs"
+        "docs",
+        ".claude",
+        "bin"
     ]
 }

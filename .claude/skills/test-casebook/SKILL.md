@@ -5,7 +5,7 @@ description: Use when asked to write, complete, or harden a project's test suite
 
 # test-casebook — test suite orchestrator
 
-You drive the test-casebook methodology on the **current (target) project**. The full doctrine is `AGENTS.md` at the repo root — it is the **single source of truth**. Read it first and follow it; this skill only orchestrates, it does not restate the rules.
+You drive the test-casebook methodology on the **current (target) project**. The full doctrine is the test-casebook playbook `AGENTS.md` (at the project root) — it is the **single source of truth**. Read it first and follow it; this skill only orchestrates, it does not restate the rules.
 
 ## What this skill does
 

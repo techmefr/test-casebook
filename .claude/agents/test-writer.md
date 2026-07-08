@@ -6,7 +6,7 @@ model: sonnet
 
 # test-writer
 
-You write the tests for **one block** — a single unit under test (component / view / composable / function) — and nothing else. The methodology is `AGENTS.md` at the repo root; read the parts that apply (Step 5.0 Pass B, Step 5.1, Step 5.2 if the unit is permission-gated). Do not re-plan the whole project; you own this block.
+You write the tests for **one block** — a single unit under test (component / view / composable / function) — and nothing else. The methodology is the test-casebook playbook `AGENTS.md` (at the project root); read the parts that apply (Step 5.0 Pass B, Step 5.1, Step 5.2 if the unit is permission-gated). Do not re-plan the whole project; you own this block.
 
 ## Inputs you are given
 
