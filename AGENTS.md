@@ -4,14 +4,14 @@
 
 `env-attr-cleaner` is a build-time **cleaner**: you write `data-test-*` attributes for testing, they stay in `development`/`test` builds, and they are stripped from `staging`/`production`. The goal of this playbook is: the **same selectors** drive your unit, integration and E2E tests, and never reach users.
 
-## Two parts — cleaner (prerequisite) and testing methodology
+## Two parts — cleaner (optional) and testing methodology
 
-This playbook has two separable halves. They will eventually live apart: a **cleaner repo published to npm** (code only — `env-attr-cleaner` / `env-attr-cleaner-bun`) and a **hosted documentation site** carrying all the prose docs (per-framework wiring, the testing guide, and this playbook itself).
+This playbook has two separable halves, and they live in **separate repos**:
 
-- **Part A — the cleaner (optional, opt-in).** Steps 1–2 plus the production strip-check in Step 6. **Never install it on your own — ask the user first** (see Step 2). Reference it only by its **published npm package name**, never by a repo path. The package is being extracted into its own repository, so its install source / URL is changing — warn the user of this before wiring it in.
-- **Part B — the testing methodology.** Steps 3–6 — runners, attributes, the `task-test.md` plan, coverage, verification. This half stands on its own and does **not** require the cleaner.
+- **Part A — the cleaner (optional, opt-in).** Steps 1–2 plus the production strip-check in Step 6. Published to npm as **`env-attr-cleaner`** (Bun runtime: **`env-attr-cleaner-bun`**); its per-framework wiring docs live in that repo. **Never install it on your own — ask the user first** (see Step 2). Reference it only by its **published npm package name**, never by a repo path.
+- **Part B — the testing methodology.** Steps 3–6 — runners, attributes, the `task-test.md` plan, coverage, verification. Lives here (`test-casebook`) and stands on its own: it does **not** require the cleaner.
 
-All prose docs (framework wiring **and** the testing guide) are referenced below as **"the test-casebook docs site"** — a stable, neutral label so nothing breaks at split time. *Until that site exists, those pages live in the `docs/` tree of this repo (`docs/frameworks/`, `docs/testing-guide/`); substitute the real site URLs when the site goes live.* Keep the dependency one-way and never assume the cleaner and the methodology share a repo.
+Prose docs are split by concern: per-framework **wiring** docs ship with the `env-attr-cleaner` repo; the **testing guide** and conventions ship here (`docs/`). Below they are referenced as **"the docs"** — substitute the real repo / site URLs as they go live. Keep the dependency **one-way**: the methodology knows about the cleaner, never the reverse.
 
 ## Definition of done
 
@@ -42,7 +42,7 @@ Read the target project's `package.json` dependencies and config files, then pic
 | `svelte` / `@sveltejs/kit` | Svelte / SvelteKit | `vite` |
 | `astro` | Astro | `vite` (inside `astro.config` → `vite.plugins`) |
 | `bun` runtime build only | Bun | use the **`env-attr-cleaner-bun`** package instead |
-| `@angular/core` | Angular | **Not supported — stop.** See the Angular page on the test-casebook docs site; do not try to wire env-attr-cleaner into an Angular build. |
+| `@angular/core` | Angular | **Not supported — stop.** See the Angular page in the `env-attr-cleaner` repo docs; do not try to wire env-attr-cleaner into an Angular build. |
 
 Match the target project's **package manager** (pnpm / npm / yarn / bun) for every install command below — detect it from the lockfile.
 
@@ -50,11 +50,10 @@ Match the target project's **package manager** (pnpm / npm / yarn / bun) for eve
 
 ## Step 2 — Install and wire the cleaner (ask first)
 
-**Confirmation gate — do not skip.** The cleaner is optional and its home is moving. Before you install or change anything:
+**Confirmation gate — do not skip.** The cleaner is optional. Before you install or change anything:
 
-1. **Ask the user whether they want to use env-attr-cleaner at all.** The testing methodology (Steps 3–6) works without it; the only thing lost without it is the automatic strip of `data-test-*` from production builds (Step 6.4). If they decline, skip the rest of Step 2 and the Step 6 strip-check, and continue with Part B.
-2. **Warn them that the install source is changing.** The cleaner is being split into its own repository and published under its own npm package, so its URL / install command may change soon — flag this so they don't wire in a source that will move.
-3. **Do not run any install command autonomously.** Only install once the user has explicitly confirmed. Never add the dependency, edit the build config, or run `pnpm add` before that confirmation.
+1. **Ask the user whether they want to use `env-attr-cleaner` at all.** The testing methodology (Steps 3–6) works without it; the only thing lost without it is the automatic strip of `data-test-*` from production builds (Step 6.4). If they decline, skip the rest of Step 2 and the Step 6 strip-check, and continue with Part B.
+2. **Do not run any install command autonomously.** Only install once the user has explicitly confirmed. Never add the dependency, edit the build config, or run `pnpm add` before that confirmation.
 
 Once the user has confirmed, install:
 
@@ -80,7 +79,7 @@ envAttrCleaner({
 - **Astro:** add it to `vite.plugins` in `astro.config.ts`.
 - **Next.js:** `import { webpack as envAttrCleaner } from 'env-attr-cleaner'` → `webpack(config){ config.plugins.push(envAttrCleaner({...})); return config }` in `next.config.ts`.
 
-The keys map to `NODE_ENV`. The arrays list the patterns to **strip**; every other `data-*` (HTMX, Alpine, ARIA helpers) is preserved. For exact per-framework snippets, read the matching framework page on the test-casebook docs site.
+The keys map to `NODE_ENV`. The arrays list the patterns to **strip**; every other `data-*` (HTMX, Alpine, ARIA helpers) is preserved. For exact per-framework snippets, read the matching framework page in the `env-attr-cleaner` repo (`docs/frameworks/`).
 
 ---
 
@@ -346,7 +345,7 @@ test('user logs in', async ({ page }) => {
 })
 ```
 
-For deeper scenario snippets (forms, tables, modals, auth, i18n, state…), read the testing guide on the test-casebook docs site.
+For deeper scenario snippets (forms, tables, modals, auth, i18n, state…), read the testing guide in `docs/testing-guide/`.
 
 ---
 
@@ -389,5 +388,5 @@ If the grep finds anything, the cleaner is not wired correctly — recheck Step 
 - Do **not** simulate personas by mutating one user's rights on the fly, and do **not** fall back to the default user when a persona can't be minted — mint each persona fresh and authenticate as it, or stop and flag the missing capability (see Step 5.2).
 - Do **not** use full-DOM snapshot tests as a substitute for assertions. A `toMatchSnapshot()` over rendered markup asserts nothing meaningful, inflates coverage, and gets regenerated blindly with `-u` on every change. Assert on explicit `data-test-*` hooks and behaviour instead. (A tiny, intentional inline snapshot of one serialized value is fine; a whole-component snapshot standing in for real cases is not.)
 - Do **not** remove or rename other `data-*` attributes.
-- Do **not** attempt Angular — env-attr-cleaner cannot strip its templates (see the Angular page on the test-casebook docs site).
+- Do **not** attempt Angular — env-attr-cleaner cannot strip its templates (see the Angular page in the `env-attr-cleaner` repo docs).
 - Keep the cleaner config's `staging`/`production` arrays in sync with any extra patterns you introduce (e.g. `data-debug-*`).
