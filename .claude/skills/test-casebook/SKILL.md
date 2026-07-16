@@ -9,7 +9,7 @@ You drive the test-casebook methodology on the **current (target) project**. The
 
 ## What this skill does
 
-1. **Read `AGENTS.md`** end to end. It defines the conventions, the `task-test.md` plan, strict typing, determinism, the persona matrix (Step 5.2), the anti-mock-drift rules, coverage floor, and verification.
+1. **Read `AGENTS.md`** end to end. It defines the conventions, the `task-test.md` plan, strict typing, determinism, the permission matrix (Step 5.2), the anti-mock-drift rules, coverage floor, and verification.
 2. **Steps 1–3 yourself** (they need judgement, not delegation): detect the stack, run the Step 2 opt-in gate for `env-attr-cleaner` (ask the user; never install autonomously), install/configure the runner(s).
 3. **Build the plan** (`task-test.md`, Step 5.0 Pass A): list every unit, read each unit's source end to end, enumerate every case as a checkbox, reconcile against existing tests. Do this yourself — it is the backbone everything else hangs on.
 4. **Execute block by block** (Step 5.0 Pass B) by delegating each block:
@@ -23,8 +23,8 @@ You drive the test-casebook methodology on the **current (target) project**. The
 
 - Blocks are independent: you may run several `test-writer` → `test-reviewer` chains concurrently, but keep **one reviewer per block, distinct from its writer** (independent perspective is the point).
 - Pass each sub-agent only what it needs: the unit's path, its enumerated cases from `task-test.md`, and the relevant `data-test-*` hooks. The sub-agents do not re-plan; they execute their block against the doctrine.
-- Permission-gated units carry a **persona matrix** (Step 5.2). If the target project has no way to instantiate the required personas (a factory / token minter), **stop and tell the user** — do not fabricate a green test run as a single user.
+- Permission-gated units carry a **permission matrix** (Step 5.2). If the target project has no way to drive the permission state at all (feed the gate / permission as an input, or real test users in E2E), **stop and tell the user** — do not fabricate a green test run locked to a single default state.
 
 ## Definition of done
 
-Every box in `task-test.md` ticked, reviewed, and committed; coverage ≥ 90% and enforced; production build free of `data-test-*` (if the cleaner is used); every permission-gated unit covered by its persona matrix. See `AGENTS.md` → "Definition of done".
+Every box in `task-test.md` ticked, reviewed, and committed; coverage ≥ 90% and enforced; production build free of `data-test-*` (if the cleaner is used); every permission-gated unit covered by its permission matrix. See `AGENTS.md` → "Definition of done".

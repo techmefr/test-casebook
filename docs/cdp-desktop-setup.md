@@ -20,7 +20,7 @@ Ton Claude lit le fichier et déroule le process.
 
 ## Ce qui va se passer
 
-- Il **pose des questions**, une à la fois (personas / rôles, qui peut et **qui ne doit pas**, zones à risque de régression). Réponds au mieux — en Desktop il ne lit pas le code, il s'appuie sur la story + tes réponses.
+- Il **pose des questions**, une à la fois (états de permission / rôles, qui peut et **qui ne doit pas**, zones à risque de régression). Réponds au mieux — en Desktop il ne lit pas le code, il s'appuie sur la story + tes réponses.
 - Il **confirme le plan** avant de créer quoi que ce soit dans Jira.
 - Il crée **une sous-tâche par équipe** : label = l'équipe (`front` / `back` / `mobile`), assignee = le dev si tu le donnes, reliée à la story.
 
@@ -28,4 +28,4 @@ Ton Claude lit le fichier et déroule le process.
 
 - **Teste d'abord sur une story bac-à-sable**, pas sur un vrai ticket en cours : l'agent crée de **vraies** sous-tâches Jira.
 - Le connecteur Jira doit avoir le **droit d'écriture** (création d'issues), sinon il ne pourra que lire.
-- Si une équipe n'a pas encore de moyen de « jouer » les personas (comptes de test), l'agent le **signale** dans la sous-tâche plutôt que de faire semblant.
+- Si une équipe n'a pas encore de moyen de **piloter l'état de permission** dans ses tests (fournir le gate / la permission en entrée, ou de vrais comptes de test en E2E), l'agent le **signale** dans la sous-tâche plutôt que de faire semblant.

@@ -1,6 +1,6 @@
 ---
 name: test-reviewer
-description: Independently reviews ONE written block against the test-casebook doctrine before it is committed — verifies every planned case has a real assertion, selectors are data-test-* only, typing is strict, tests assert behaviour (and actually fail when it breaks), no snapshot stand-ins, no real network/clock/shared state, and the persona matrix is complete for gated units. Returns approve/reject with specific findings. Use it per block after test-writer, never on a block it wrote itself.
+description: Independently reviews ONE written block against the test-casebook doctrine before it is committed — verifies every planned case has a real assertion, selectors are data-test-* only, typing is strict, tests assert behaviour (and actually fail when it breaks), no snapshot stand-ins, no real network/clock/shared state, and the permission matrix is complete for gated units. Returns approve/reject with specific findings. Use it per block after test-writer, never on a block it wrote itself.
 model: sonnet
 ---
 
@@ -22,7 +22,7 @@ You are the **independent gate** on one block before it is committed. You did no
 4. **Behaviour, not implementation** — tests assert observable behaviour and **actually fail when the behaviour is broken**. Sanity-check at least one by reasoning about a mutation that should break it.
 5. **Isolation & determinism** — no real network/clock/shared state; MSW fixtures typed from the real contract (a lying/drifted mock is a reject), seeded stores, frozen time, pinned timezone/locale.
 6. **No snapshot stand-ins** — a whole-component `toMatchSnapshot()` standing in for real assertions is a reject.
-7. **Persona matrix (gated units, Step 5.2)** — scenario × persona present, expected taken from the plan (not computed from the app's own check — that is circular), at least one *refused* persona per gated capability, every enforcement layer asserted, and a multi-role unit case. If personas could not be instantiated, that must be surfaced, not faked.
+7. **Permission matrix (gated units, Step 5.2)** — scenario × permission state present, expected taken from the plan (not computed from the app's own check — that is circular), at least one *refused* permission state per gated capability, every enforcement layer asserted, and a multi-role unit case. If the permission state could not be driven at all, that must be surfaced, not faked.
 
 ## Output
 
