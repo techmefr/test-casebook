@@ -17,7 +17,8 @@ You write the tests for **one block** — a single unit under test (component / 
 ## What you do
 
 1. **Read the unit's full source** before writing — every branch, state, prop, guard, and the collaborators it calls. Write against what it actually does, not its name.
-2. **One assertion-bearing test per checkbox.** No case left without a test; no `expect(true)`; if a path is genuinely unreachable, leave a one-line note why instead of dropping it.
+2. **One assertion-bearing test per checkbox.** No case left without a test; no `expect(true)`; if a path is genuinely unreachable, note why in `task-test.md` next to the checkbox instead of dropping it — **never as a comment in the test file**.
+   - **No comments in the code you write.** No `// arrange / act / assert`, no section banners, no explanatory notes anywhere in the test file (or in the component when you add hooks). The `describe` / `it` / test names and the variable names carry the intent — if a test would need a comment to be understood, rename it or split it. Strip any comment you find while repairing existing tests.
 3. **Add the `data-test-*` hooks** each case needs directly to the markup/JSX — never reach for CSS, tag structure, or visible text to cover an awkward case.
 4. **Type everything strictly** (Pass B step 3): real prop/fixture types, typed mocks/spies to the signature they replace, narrow DOM types, no `any`, no blind `as`. The file must pass the project's type-check / lint with zero new errors.
 5. **Isolate and stay deterministic** (Step 5.1): mock the network (MSW) with fixtures typed from the real contract, seed stores, provide router/i18n via test utils, freeze time, pin timezone/locale. A mock that has drifted from the real shape is worse than no mock.

@@ -184,7 +184,7 @@ So the plan covers both green-field units and the backfill/repair of already-wri
 
 Work through `task-test.md` **one block at a time**. For each block (ideally hand the block off to a dedicated sub-agent so it stays focused on that one unit):
 
-1. **Write one assertion-bearing test per checkbox.** Every case in the block must map to at least one test; a checkbox with no test is an incomplete task, not a stylistic choice. If a path is genuinely unreachable, leave a one-line comment saying why instead of silently dropping it.
+1. **Write one assertion-bearing test per checkbox.** Every case in the block must map to at least one test; a checkbox with no test is an incomplete task, not a stylistic choice. If a path is genuinely unreachable, note why in `task-test.md` next to the checkbox instead of silently dropping it — **not** as a comment in the test file (see Guardrails: no comments in code).
 2. **Add the `data-test-*` hooks** each case needs to the component as you go, rather than reaching for text or CSS to cover an awkward case.
 3. **Type the test fully — no `any`.** In a TypeScript project the test file and everything in it must be typed as strictly as the production code:
    - import and use the component's **real prop / fixture types** (`ComponentProps<typeof X>`, the exported interfaces) — never retype props inline or with `any`;
@@ -197,6 +197,7 @@ Work through `task-test.md` **one block at a time**. For each block (ideally han
 5. **Review before committing — hand the block to a dedicated review agent.** Once the block's boxes are ticked and its tests are green, a separate review agent (not the one that wrote the tests) validates the block against this playbook before anything is committed. It checks that:
    - every case listed for the block in `task-test.md` has a real, assertion-bearing test (no ticked-but-missing, no empty/placeholder tests, no `expect(true)`);
    - selectors are `data-test-*` only — no class/text/structure selectors slipped in;
+   - there are **no comments** in the test file — intent lives in `describe`/`it`/test names, not in `// ...` notes or section banners (see Guardrails);
    - typing is strict per Pass B step 3 — no `any`, no untyped fixtures/mocks, no blind `as`, and the type-check / lint is clean;
    - the tests assert behaviour, not implementation details, and actually fail when the behaviour is broken (sanity-check at least one);
    - no full-DOM snapshot is standing in for real assertions, and tests don't touch the real network/clock/shared state (MSW, seeded stores, fake timers — see Step 5.1).
@@ -375,6 +376,7 @@ If the grep finds anything, the cleaner is not wired correctly — recheck Step 
 - Do **not** install or wire the cleaner without the user's explicit confirmation, and warn them its package / URL is moving to a new repo (see Step 2). The methodology (Part B) runs without it.
 - Do **not** invent a new attribute scheme; use `data-test-id` / `data-test-class`.
 - Do **not** weaken tests to pass (no class/text/structure selectors).
+- Do **not** write comments in the test files (or any code you touch). No block headers, no `// arrange / act / assert`, no explanatory notes, no `describe`/section banners as comments. Names carry the intent: `describe` / `it` titles, test names, and variable/helper names say what a comment would. If a test needs a comment to be understood, rename it or split it. Anything worth writing about a case goes in `task-test.md`, never in the code. When repairing existing tests, strip any comments you find.
 - Do **not** stop at the happy path. The Step 5 examples are a starting point; ship tests only after the unit's source has been read and every box in the `task-test.md` plan (Step 5.0) has a passing test.
 - Do **not** skip the `task-test.md` plan and write tests straight from a guess — the plan, built from reading the source, is what makes coverage exhaustive instead of basic.
 - Do **not** ship loosely-typed tests. No `any`, no untyped fixtures/mocks, no blind `as`; reuse the production types and let the test file pass the project's type-check (see Step 5.0 Pass B).

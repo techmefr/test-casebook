@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+- **Doctrine — no comments in test code.** New Guardrail and matching rules in `test-writer` / `test-reviewer`: test files (and any component hooks added) carry **zero** comments — no `// arrange / act / assert`, no section banners, no explanatory notes. Intent lives in `describe` / `it` / test and variable names; a test that needs a comment to be understood is renamed or split. Reasons for skipping an unreachable case go in `task-test.md`, not in the code. The reviewer rejects any comment; existing comments are stripped when repairing tests.
+
 ## 1.0.2
 
 - **Doctrine (Step 5.2)** — the *persona matrix* is now the **permission matrix**. Permission-gated units are tested by driving the **permission state** directly (the gate boolean / permission list the code reads) rather than by minting distinct user personas: in unit / integration you mock the gate input, in E2E you may use real users. The blocking "persona catalogue / token minter" prerequisite is dropped — if you cannot drive the permission state at all, flag it, otherwise test the states you can drive. The matrix (not a list), refused-cell weighting, every-enforcement-layer assertions, and multi-role aggregation coverage are unchanged.

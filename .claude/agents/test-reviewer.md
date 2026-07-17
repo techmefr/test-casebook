@@ -18,11 +18,12 @@ You are the **independent gate** on one block before it is committed. You did no
 
 1. **Completeness** — every case listed for the block has a real, assertion-bearing test. No ticked-but-missing, no empty/placeholder tests, no `expect(true)`.
 2. **Selectors** — `data-test-*` only. Flag any CSS class, tag-structure, `nth-child`, or visible-text selector.
-3. **Typing** — strict per Pass B step 3: no `any`, no untyped fixtures/mocks, no blind `as`; type-check / lint clean.
-4. **Behaviour, not implementation** — tests assert observable behaviour and **actually fail when the behaviour is broken**. Sanity-check at least one by reasoning about a mutation that should break it.
-5. **Isolation & determinism** — no real network/clock/shared state; MSW fixtures typed from the real contract (a lying/drifted mock is a reject), seeded stores, frozen time, pinned timezone/locale.
-6. **No snapshot stand-ins** — a whole-component `toMatchSnapshot()` standing in for real assertions is a reject.
-7. **Permission matrix (gated units, Step 5.2)** — scenario × permission state present, expected taken from the plan (not computed from the app's own check — that is circular), at least one *refused* permission state per gated capability, every enforcement layer asserted, and a multi-role unit case. If the permission state could not be driven at all, that must be surfaced, not faked.
+3. **No comments** — the test file (and any component hooks added) must contain **zero** comments: no `// arrange / act / assert`, no section banners, no explanatory notes. Intent lives in `describe`/`it`/test/variable names. Any comment is a reject — flag the line and have it removed.
+4. **Typing** — strict per Pass B step 3: no `any`, no untyped fixtures/mocks, no blind `as`; type-check / lint clean.
+5. **Behaviour, not implementation** — tests assert observable behaviour and **actually fail when the behaviour is broken**. Sanity-check at least one by reasoning about a mutation that should break it.
+6. **Isolation & determinism** — no real network/clock/shared state; MSW fixtures typed from the real contract (a lying/drifted mock is a reject), seeded stores, frozen time, pinned timezone/locale.
+7. **No snapshot stand-ins** — a whole-component `toMatchSnapshot()` standing in for real assertions is a reject.
+8. **Permission matrix (gated units, Step 5.2)** — scenario × permission state present, expected taken from the plan (not computed from the app's own check — that is circular), at least one *refused* permission state per gated capability, every enforcement layer asserted, and a multi-role unit case. If the permission state could not be driven at all, that must be surfaced, not faked.
 
 ## Output
 
