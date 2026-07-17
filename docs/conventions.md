@@ -32,14 +32,16 @@ Group similar elements for counting or filtering.
 <div data-test-class="product-card featured">...</div>
 ```
 
-**Usage in tests**:
+**Usage in tests** — count the group:
 
 ```ts
-// Compter
 const cards = page.locator('[data-test-class~="product-card"]')
 await expect(cards).toHaveCount(3)
+```
 
-// Filtrer
+Filter within it:
+
+```ts
 const featured = page.locator('[data-test-class~="featured"]')
 ```
 
@@ -111,17 +113,12 @@ Analytics event tracking.
 ```ts
 envAttrCleaner({
     environments: {
-        // Tous les attributs en developpement
         development: ['data-test-*', 'data-debug-*', 'data-analytics-*'],
-
-        // Uniquement les attributs de test en CI
         test: ['data-test-*'],
-
-        // Test + analytics en staging
         staging: ['data-test-*', 'data-analytics-*'],
-
-        // Uniquement analytics en production (ou rien)
         production: ['data-analytics-*']
     }
 })
 ```
+
+Per environment: `development` keeps every attribute, `test` (CI) keeps only the test attributes, `staging` keeps test plus analytics, and `production` keeps only analytics (or nothing).

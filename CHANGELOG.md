@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+
+- **Docs scrubbed of comments.** Every code example in `docs/` (testing-guide, conventions, strategy) is now comment-free, so the examples model the no-comments rule instead of contradicting it. Explanations that lived in `// ...` notes (teleport gotchas, the triple-await, the fragile-vs-stable selector contrast, per-environment cleaner config) moved into surrounding prose — no information lost.
+
 ## 1.0.3
 
 - **Doctrine — no comments in test code.** New Guardrail and matching rules in `test-writer` / `test-reviewer`: test files (and any component hooks added) carry **zero** comments — no `// arrange / act / assert`, no section banners, no explanatory notes. Intent lives in `describe` / `it` / test and variable names; a test that needs a comment to be understood is renamed or split. Reasons for skipping an unreachable case go in `task-test.md`, not in the code. The reviewer rejects any comment; existing comments are stripped when repairing tests.

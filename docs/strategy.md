@@ -3,25 +3,21 @@
 
 ## The Problem
 
-Traditional selectors are **fragile**:
+Traditional selectors are **fragile** — a CSS class, the DOM structure, and the text respectively:
 
 ```ts
-// Breaks when CSS changes
 cy.get('.btn-primary')
-
-// Breaks when structure changes
 cy.get('form > div:nth-child(2) > button')
-
-// Breaks when text changes
 cy.get('button').contains('Envoyer')
 ```
 
+The first breaks when the class changes, the second when the markup is restructured, the third when the label is reworded.
+
 ## The Solution
 
-Data attributes are **stable**:
+Data attributes are **stable** — the selector only changes when someone changes it on purpose:
 
 ```ts
-// Never breaks unless intentionally changed
 cy.get('[data-test-id="submit-button"]')
 ```
 

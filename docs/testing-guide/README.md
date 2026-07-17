@@ -50,7 +50,7 @@ This guide is **community-driven**. If you have:
 
 **Code**:
 ```js
-// Your snippet here
+expect(result).toBe(expected)
 ```
 ```
 
@@ -498,19 +498,16 @@ test('cancels form without saving', async () => {
 test('navigates through form steps', async () => {
     const wrapper = await mountSuspended(MultiStepForm)
 
-    // Step 1
     expect(wrapper.find('[data-test-id="step-indicator"]').text()).toBe('Step 1 of 3')
 
     await wrapper.find('[data-test-id="step1-name"]').setValue('John Doe')
     await wrapper.find('[data-test-id="step-next"]').trigger('click')
 
-    // Step 2
     expect(wrapper.find('[data-test-id="step-indicator"]').text()).toBe('Step 2 of 3')
 
     await wrapper.find('[data-test-id="step2-email"]').setValue('john@example.com')
     await wrapper.find('[data-test-id="step-next"]').trigger('click')
 
-    // Step 3
     expect(wrapper.find('[data-test-id="step-indicator"]').text()).toBe('Step 3 of 3')
 
     await wrapper.find('[data-test-id="step3-confirm"]').setChecked(true)
@@ -577,7 +574,6 @@ test('sorts table by column', async () => {
     expect(rows[1].text()).toContain('Bob')
     expect(rows[2].text()).toContain('Charlie')
 
-    // Reverse sort
     await wrapper.find('[data-test-id="table-header-name"]').trigger('click')
 
     const rowsDesc = wrapper.findAll('[data-test-class="user-table-row"]')
@@ -845,7 +841,6 @@ test('displays different content based on user', async () => {
 
     await wrapper.setProps({ userId: 456 })
 
-    // Modal should load new data
     expect(wrapper.find('[data-test-state="loading"]').exists()).toBe(true)
 })
 ```
@@ -918,10 +913,7 @@ test('requires multiple permissions for action', async () => {
 
     const wrapper = await mountSuspended(UserManagement)
 
-    // User can view and edit
     expect(wrapper.find('[data-test-id="edit-btn"]').exists()).toBe(true)
-
-    // But can't delete (permission missing)
     expect(wrapper.find('[data-test-id="delete-btn"]').exists()).toBe(false)
 })
 ```
@@ -1333,7 +1325,7 @@ test('debounces search input', async () => {
 
     expect(mockSearch).not.toHaveBeenCalled()
 
-    vi.advanceTimersByTime(200) // Total 300ms
+    vi.advanceTimersByTime(200)
 
     expect(mockSearch).toHaveBeenCalledTimes(1)
     expect(mockSearch).toHaveBeenCalledWith('ab')
@@ -1362,7 +1354,6 @@ test('reorders items with drag and drop', async () => {
 
     const items = wrapper.findAll('[data-test-class="sortable-item"]')
 
-    // Simulate drag & drop
     await items[0].trigger('dragstart')
     await items[2].trigger('drop')
 
@@ -2395,9 +2386,10 @@ test('button has correct type attribute', async () => {
 Some components do not inject their content into the parent component's DOM, but directly into `document.body`. Result: `wrapper.find(...)` finds nothing, even if the component is visually present.
 
 ```js
-// Returns exists() = false — content is teleported outside the wrapper
 wrapper.find('[data-test-id="dialog-content"]')
 ```
+
+This returns `exists() = false`: the content is teleported outside the wrapper.
 
 **Warning sign:** if `find()` returns `exists() = false` on a component that displays correctly in dev, it's very likely a teleport problem.
 
@@ -2418,9 +2410,11 @@ wrapper.find('[data-test-id="dialog-content"]')
 
 **1. Mount with `attachTo: document.body`**
 
+`attachTo: document.body` is required for teleports to resolve.
+
 ```js
 const wrapper = await mountSuspended(MyComponent, {
-    attachTo: document.body  // required for teleports to work
+    attachTo: document.body
 })
 ```
 
@@ -2428,21 +2422,24 @@ const wrapper = await mountSuspended(MyComponent, {
 
 ```js
 await wrapper.find('[data-test-id="open-dialog-btn"]').trigger('click')
-await nextTick()       // Vue processes reactivity
-await flushPromises()  // promises resolve
-await nextTick()       // second tick for the teleport itself
+await nextTick()
+await flushPromises()
+await nextTick()
 ```
+
+The three awaits are: `nextTick` for Vue reactivity, `flushPromises` for pending promises, then a second `nextTick` for the teleport itself.
 
 **3. Search in `document.body` rather than `wrapper`**
 
+`wrapper.find()` does not find teleported content — query `document.body` instead:
+
 ```js
-// Does not find — content teleported outside wrapper
-wrapper.find('[data-test-id="dialog-title"]')
-
-// Finds — searching in document.body
 document.body.querySelector('[data-test-id="dialog-title"]')
+```
 
-// Or via findComponent + props if no data-test-id
+Or assert via `findComponent` + props when there is no `data-test-id`:
+
+```js
 import { VDialog } from 'vuetify/components'
 const dialog = wrapper.findComponent(VDialog)
 expect(dialog.props('modelValue')).toBe(true)
@@ -2453,7 +2450,7 @@ expect(dialog.props('modelValue')).toBe(true)
 ```js
 afterEach(() => {
     wrapper.unmount()
-    document.body.innerHTML = ''  // prevents leaks between tests
+    document.body.innerHTML = ''
 })
 ```
 
@@ -2494,19 +2491,15 @@ describe('UserCreateModal', () => {
             attachTo: document.body
         })
 
-        // Before opening: dialog closed
         expect(wrapper.findComponent(VDialog).props('modelValue')).toBe(false)
 
-        // Trigger opening
         await wrapper.find('[data-test-id="open-dialog-btn"]').trigger('click')
         await nextTick()
         await flushPromises()
         await nextTick()
 
-        // Verify via VDialog props
         expect(wrapper.findComponent(VDialog).props('modelValue')).toBe(true)
 
-        // Verify content via document.body
         const title = document.body.querySelector('[data-test-id="dialog-title"]')
         expect(title?.textContent).toContain('Create a user')
     })
@@ -2514,14 +2507,13 @@ describe('UserCreateModal', () => {
     it('submits the form and closes the modal', async () => {
         wrapper = await mountSuspended(UserCreateModal, {
             attachTo: document.body,
-            props: { modelValue: true }  // open directly without click
+            props: { modelValue: true }
         })
 
         await nextTick()
         await flushPromises()
         await nextTick()
 
-        // Interact via document.body
         const input = document.body.querySelector('[data-test-id="modal-form-name"]')
         input.value = 'John Doe'
         input.dispatchEvent(new Event('input'))
@@ -2531,7 +2523,6 @@ describe('UserCreateModal', () => {
         submitBtn.click()
         await flushPromises()
 
-        // The modal must emit its closing
         expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([false])
     })
 })
