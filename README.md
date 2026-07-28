@@ -54,6 +54,17 @@ Three channels, **one source of truth** (this repo's `AGENTS.md` + docs), never 
 
 Pre-release (not yet published to npm). Usable today via the Claude Code skill, the scaffolder (`node bin/test-casebook.mjs init`), or by handing `AGENTS.md` to any agent; marketplace packaging is in progress.
 
+## Contributing
+
+This doctrine gets better the more real projects run it. If you hit a gap or a bug, don't just work around it — **open an issue or a PR**:
+
+- **A stack is missing its own cookbook.** Vue (no Nuxt), Svelte, Astro and Bun are auto-detected (`AGENTS.md` Step 1/3) but follow the general playbook rather than a dedicated `docs/testing-guide/*.md` like Nuxt, React and Laravel have. If you ran the doctrine on one of these and worked out the framework-specific snippets, that's exactly the kind of PR worth sending.
+- **A snippet or command is wrong.** Every code example here should reflect the real API of the tool it names — if you find one that's drifted (a renamed method, a changed CLI flag, a library major-version change), open an issue with what actually happened, or a PR with the fix. `docs/testing-guide/laravel.md`'s E2E section already had one such fix (an invented `$this->visit()->fill()` API corrected against the real Pest v4 browser plugin docs) — that's the bar: verify against the real tool, don't guess.
+- **A rule doesn't fit your project's reality.** If a Guardrail or a Step in `AGENTS.md` conflicts with something you can't avoid in a real codebase, say so in an issue — the doctrine should describe what actually works, not what sounds right on paper.
+- **The scaffolder or the gate hook misbehaves.** `bin/test-casebook.mjs` and `.claude/hooks/test-casebook-gate.mjs` are plain Node scripts — bug reports (wrong file matched/missed, a flag that doesn't do what it says) are welcome, ideally with the command you ran and what you expected instead.
+
+No process beyond that: fork, branch, PR against `main`, describe what you verified (ideally against a real running project, not just read the docs and reasoned about it).
+
 ## License
 
 MIT

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.9
+
+- **README — Contributing section.** Points contributors at the concrete gaps worth a PR (missing dedicated guides for Vue/Svelte/Astro/Bun, drifted API snippets, scaffolder/hook bugs) and sets the bar: verify against the real tool, don't guess — referencing the earlier Pest v4 browser plugin fix as the example of what that looks like.
+
 ## 1.0.8
 
 - **Laravel guide — worked example (roles + a private article).** New "Worked example" section in `docs/testing-guide/laravel.md`: a blog with four permission states (admin / author / authenticated non-author / guest) and a private-article scenario, policy shared between route middleware and the listing's own filter, and a full `task-test.md` block (28 cases) dense on the refused cells per Step 5.2 — including the non-primary-role case (admin editing an article it doesn't own) and both enforcement layers (Livewire action + HTTP route) for the refused save. Verified for real: built and run against a real Laravel + Livewire + Pest project in Docker, 28/28 green, 51 assertions. Also documents a real gotcha hit while building it — a route pointing straight at a Livewire component needs `resources/views/layouts/app.blade.php` or every route throws "No hint path defined for [layouts]".
