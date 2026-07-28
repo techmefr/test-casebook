@@ -56,14 +56,17 @@ Pre-release (not yet published to npm). Usable today via the Claude Code skill, 
 
 ## Contributing
 
-This doctrine gets better the more real projects run it. If you hit a gap or a bug, don't just work around it — **open an issue or a PR**:
+**Contributions are very welcome — this doctrine only gets sharper by running into real projects, and every one of them surfaces something worth fixing or adding.** You don't need permission or a big change to send a PR: a one-line fix, a missing case, a new guide all count. If you're not sure whether something is worth raising, open the issue anyway — that's what it's for.
 
-- **A stack is missing its own cookbook.** Vue (no Nuxt), Svelte, Astro and Bun are auto-detected (`AGENTS.md` Step 1/3) but follow the general playbook rather than a dedicated `docs/testing-guide/*.md` like Nuxt, React and Laravel have. If you ran the doctrine on one of these and worked out the framework-specific snippets, that's exactly the kind of PR worth sending.
-- **A snippet or command is wrong.** Every code example here should reflect the real API of the tool it names — if you find one that's drifted (a renamed method, a changed CLI flag, a library major-version change), open an issue with what actually happened, or a PR with the fix. `docs/testing-guide/laravel.md`'s E2E section already had one such fix (an invented `$this->visit()->fill()` API corrected against the real Pest v4 browser plugin docs) — that's the bar: verify against the real tool, don't guess.
-- **A rule doesn't fit your project's reality.** If a Guardrail or a Step in `AGENTS.md` conflicts with something you can't avoid in a real codebase, say so in an issue — the doctrine should describe what actually works, not what sounds right on paper.
-- **The scaffolder or the gate hook misbehaves.** `bin/test-casebook.mjs` and `.claude/hooks/test-casebook-gate.mjs` are plain Node scripts — bug reports (wrong file matched/missed, a flag that doesn't do what it says) are welcome, ideally with the command you ran and what you expected instead.
+Ideas for where to start:
 
-No process beyond that: fork, branch, PR against `main`, describe what you verified (ideally against a real running project, not just read the docs and reasoned about it).
+- **Write the cookbook your stack is missing.** Vue (no Nuxt), Svelte, Astro and Bun are auto-detected (`AGENTS.md` Step 1/3) but only follow the general playbook — Nuxt, React and Laravel are the only ones with a dedicated `docs/testing-guide/*.md` so far. If you've run the doctrine on one of these and worked out the framework-specific snippets, that guide is genuinely wanted — this is one of the highest-value contributions right now.
+- **Fix a snippet or command that's drifted.** Every code example here should reflect the real API of the tool it names. `docs/testing-guide/laravel.md`'s E2E section already had one such fix (an invented `$this->visit()->fill()` API corrected against the real Pest v4 browser plugin docs) — if you spot the next one, a PR with the fix (or even just an issue flagging it) is exactly the kind of contribution that keeps this trustworthy.
+- **Tell us where a rule doesn't fit.** If a Guardrail or a Step in `AGENTS.md` conflicts with something you can't avoid in a real codebase, open an issue about it — the doctrine should describe what actually works, not what sounds right on paper, and that only happens if people say when it doesn't.
+- **Report scaffolder or hook bugs.** `bin/test-casebook.mjs` and `.claude/hooks/test-casebook-gate.mjs` are plain Node scripts — wrong file matched/missed, a flag that doesn't do what it says, anything — file it.
+- **Share a worked example.** The Laravel guide's permission-matrix example (roles + a private article, run for real, 28/28 green) started as exactly this kind of contribution — if you've built something similar for another stack or scenario, it's worth adding.
+
+No process beyond that: fork, branch, PR against `main`. Mention what you verified it against (a real running project beats reasoning from the docs) so reviewers can move fast — but don't let an imperfect PR stop you from opening it.
 
 ## License
 

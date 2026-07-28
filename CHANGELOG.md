@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.10
+
+- **README — warmer Contributing section.** Reframed from a bug-report checklist to an explicit invitation: contributions are welcome, no permission or big change needed, small fixes count. Added a fifth idea (share a worked example, pointing at the Laravel permission-matrix example as the template) and closed with "don't let an imperfect PR stop you from opening it."
+
 ## 1.0.9
 
 - **README — Contributing section.** Points contributors at the concrete gaps worth a PR (missing dedicated guides for Vue/Svelte/Astro/Bun, drifted API snippets, scaffolder/hook bugs) and sets the bar: verify against the real tool, don't guess — referencing the earlier Pest v4 browser plugin fix as the example of what that looks like.
