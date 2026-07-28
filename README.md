@@ -4,7 +4,7 @@
 
 `test-casebook` is the **doctrine** half of the testing workflow: the conventions, strategy, scenario guide, and the agent playbook (`AGENTS.md`) that an AI coding agent applies to a target project to produce complete, reliable tests.
 
-It pairs with [`env-attr-cleaner`](https://github.com/techmefr/env-attr-cleaner) — the build-time tool that strips `data-test-*` attributes from production. The dependency is **one-way**: the methodology knows about the cleaner, the cleaner knows nothing about the methodology.
+It pairs with [`env-attr-cleaner`](https://github.com/techmefr/env-attr-cleaner) — the build-time tool that strips `data-test-*` attributes from production, on bundler-based JS stacks (Nuxt, Vue, React, Next.js, Svelte, Astro, Bun). The dependency is **one-way**: the methodology knows about the cleaner, the cleaner knows nothing about the methodology. Server-rendered stacks with no JS bundler (Laravel / Livewire / Blade / Folio) skip the cleaner entirely and go straight to the testing methodology — see `docs/testing-guide/laravel.md`.
 
 ## What's inside
 
@@ -13,7 +13,7 @@ It pairs with [`env-attr-cleaner`](https://github.com/techmefr/env-attr-cleaner)
 - **`.claude/skills/test-casebook/`** + **`.claude/agents/{test-writer,test-reviewer}`** — *(developer, downstream)* executes that contract on the code — plan per unit, write, review, verify.
 - **`docs/strategy.md`** — why `data-test-*` over CSS / structural / text selectors.
 - **`docs/conventions.md`** — naming rules for `data-test-id` / `data-test-class`.
-- **`docs/testing-guide/`** — ready-to-use scenario snippets.
+- **`docs/testing-guide/`** — ready-to-use scenario snippets, one guide per stack: Nuxt + Vitest, React + Vitest, Laravel + Pest + Livewire.
 
 ## The flow
 
@@ -21,7 +21,7 @@ Story → **`test-task` skill** (PM) writes one `test-task.md` → given to the 
 
 ## Core idea
 
-Write dedicated `data-test-*` attributes for testing. The **same selectors** drive unit, integration and E2E tests, never reach production (stripped by `env-attr-cleaner`), and stay stable across refactors because they're decoupled from style, structure and text.
+Write dedicated `data-test-*` attributes for testing. The **same selectors** drive unit, integration and E2E tests, stay out of production (stripped by `env-attr-cleaner`, or by an equivalent environment-gated directive on server-rendered stacks), and stay stable across refactors because they're decoupled from style, structure and text.
 
 The playbook's job is to make coverage **exhaustive instead of happy-path**: plan from reading the source, enumerate every case (props, branches, states, interactions, guards, permissions), and verify each one — not re-implement a few examples.
 

@@ -43,8 +43,9 @@ Read the target project's `package.json` dependencies and config files, then pic
 | `astro` | Astro | `vite` (inside `astro.config` → `vite.plugins`) |
 | `bun` runtime build only | Bun | use the **`env-attr-cleaner-bun`** package instead |
 | `@angular/core` | Angular | **Not supported — stop.** See the Angular page in the `env-attr-cleaner` repo docs; do not try to wire env-attr-cleaner into an Angular build. |
+| `composer.json` with `laravel/framework` (± `livewire/livewire`, `laravel/folio`) | Laravel / Livewire / Blade / Folio | **No bundler adapter — server-rendered.** Skip Step 2 entirely (Part A does not apply); go straight to Part B with Pest. See `docs/testing-guide/laravel.md`. |
 
-Match the target project's **package manager** (pnpm / npm / yarn / bun) for every install command below — detect it from the lockfile.
+Match the target project's **package manager** (pnpm / npm / yarn / bun / composer) for every install command below — detect it from the lockfile.
 
 ---
 
@@ -94,11 +95,12 @@ Install only the layers the project needs. Use the stack for the detected framew
 | Nuxt | `vitest @nuxt/test-utils @vue/test-utils happy-dom` | `@playwright/test` and/or `cypress` |
 | Svelte | `vitest @testing-library/svelte @testing-library/user-event @testing-library/jest-dom jsdom` | `@playwright/test` and/or `cypress` |
 | Astro | `vitest` (uses Astro's built-in **Container API**, no extra DOM lib) | `@playwright/test` and/or `cypress` |
+| Laravel / Livewire / Blade / Folio | `pestphp/pest pestphp/pest-plugin-laravel pestphp/pest-plugin-livewire` (via `composer require --dev`) | `pestphp/pest-plugin-browser` and/or `laravel/dusk` |
 
 Then configure the runner:
 
 - **Vitest:** create `vitest.config.ts` with the framework plugin and `test.environment` (`jsdom`/`happy-dom`; for Nuxt use `environment: 'nuxt'` via `defineVitestConfig` from `@nuxt/test-utils/config`; for Astro use `getViteConfig` from `astro/config`).
-- **Coverage (every framework — React, Vue, Nuxt, Svelte, Astro):** all of these run on Vitest, so the coverage setup is the same everywhere. Enable it and set a hard **90%** floor so the suite fails below it — install `@vitest/coverage-v8` and add this `test.coverage` block to whichever Vitest config the framework uses above:
+- **Coverage (every JS framework — React, Vue, Nuxt, Svelte, Astro):** all of these run on Vitest, so the coverage setup is the same everywhere. Enable it and set a hard **90%** floor so the suite fails below it — install `@vitest/coverage-v8` and add this `test.coverage` block to whichever Vitest config the framework uses above:
   ```ts
   test: {
       coverage: {
@@ -109,12 +111,38 @@ Then configure the runner:
   }
   ```
   Scope coverage to the source you own (`coverage.include`) and exclude framework / vendor / generated / config files (`coverage.exclude`) so the 90% reflects only the code you wrote — not the framework's own (see Step 5.1).
+- **Laravel/Pest coverage:** no Vitest here — run `vendor/bin/pest --coverage --min=90` (add `<source><include><directory>app</directory></include></source>` to `phpunit.xml` so coverage is scoped to your own code, not vendor). See `docs/testing-guide/laravel.md`.
 - **Testing Library** keys `getByTestId` to a single attribute. Set it to `data-test-id` once in a test setup file so the unit/integration snippets below work:
   ```ts
   import { configure } from '@testing-library/dom'
   configure({ testIdAttribute: 'data-test-id' })
   ```
-- **Playwright:** `npx playwright init`. **Cypress:** add `cypress.config.ts`. Point both at a `development`/`test` build URL.
+- **Selector lint gate (every JS framework):** the selector rule must be a red build, not a convention an agent can miss. Add a test-file override to the project's ESLint config so forbidden selectors fail lint, and make CI run lint alongside the tests:
+  ```js
+  {
+      files: ['**/*.{test,spec}.{js,jsx,ts,tsx}'],
+      rules: {
+          'no-restricted-properties': [
+              'error',
+              ...['getByText', 'getAllByText', 'queryByText', 'findByText',
+                  'getByRole', 'getAllByRole', 'queryByRole', 'findByRole',
+                  'getByLabelText', 'getByPlaceholderText', 'getByTitle',
+                  'getAllByTitle', 'getByDisplayValue'].map((property) => ({
+                  property,
+                  message: 'Select on data-test-* (getByTestId / data-test-class query), never text, role, or structure.',
+              })),
+              ...['querySelector', 'querySelectorAll', 'closest', 'toHaveClass'].map((property) => ({
+                  property,
+                  message: 'Select on data-test-* hooks, never CSS classes or tag structure.',
+              })),
+          ],
+      },
+  }
+  ```
+  Add a `no-restricted-imports` entry in the same override pointing at the app's real store module (e.g. `src/store/store`) so tests cannot mount the shared singleton store — Step 5.1 requires a fresh, seeded test store per test.
+  `data-test-class` has no native Testing Library query: expose a shared `getAllByTestClass(container, name)` helper from the test-utils module (not a test file, so the override does not apply there) and select groups through it — the ban stays airtight in the test files themselves.
+  **Laravel/Pest has no equivalent static lint** (no DOM/AST rule engine for Blade markup) — enforce the selector rule at review time instead (the `test-reviewer` sub-agent rejects `assertSeeText`/text or CSS selectors in Pass B, see `docs/testing-guide/laravel.md`).
+- **Playwright:** `npx playwright init`. **Cypress:** add `cypress.config.ts`. Point both at a `development`/`test` build URL. **Laravel:** `pestphp/pest-plugin-browser` or `php artisan dusk:install`, pointed at a local/`test` environment.
 
 ---
 
@@ -352,7 +380,7 @@ For deeper scenario snippets (forms, tables, modals, auth, i18n, state…), read
 
 ## Step 6 — Verify (do not skip)
 
-1. **Run the tests** with the project's commands; they must pass. Unit/integration run under `NODE_ENV=test`, where attributes are present.
+1. **Run the tests** with the project's commands; they must pass. Unit/integration run under `NODE_ENV=test`, where attributes are present. Run the project's lint too — the selector gate from Step 3 must pass with zero errors on the test files.
 2. **Run coverage and enforce the 90% floor:**
    ```bash
    pnpm vitest run --coverage      # or the project's coverage script

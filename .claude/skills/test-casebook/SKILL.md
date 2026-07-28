@@ -10,7 +10,7 @@ You drive the test-casebook methodology on the **current (target) project**. The
 ## What this skill does
 
 1. **Read `AGENTS.md`** end to end. It defines the conventions, the `task-test.md` plan, strict typing, determinism, the permission matrix (Step 5.2), the anti-mock-drift rules, coverage floor, and verification.
-2. **Steps 1–3 yourself** (they need judgement, not delegation): detect the stack, run the Step 2 opt-in gate for `env-attr-cleaner` (ask the user; never install autonomously), install/configure the runner(s).
+2. **Steps 1–3 yourself** (they need judgement, not delegation): detect the stack (Step 1 — Laravel/Livewire/Blade/Folio has no bundler, so Step 2/the cleaner does not apply; skip straight to the runner), run the Step 2 opt-in gate for `env-attr-cleaner` on JS stacks (ask the user; never install autonomously), install/configure the runner(s) — including the `configure({ testIdAttribute: 'data-test-id' })` setup line and the selector lint gate (Step 3); on JS stacks the infra is not done until a text/CSS selector fails lint, on Laravel/Pest there is no static lint for this — enforcement moves entirely to the `test-reviewer` sub-agent in Pass B.
 3. **Build the plan** (`task-test.md`, Step 5.0 Pass A): list every unit, read each unit's source end to end, enumerate every case as a checkbox, reconcile against existing tests. Do this yourself — it is the backbone everything else hangs on.
 4. **Execute block by block** (Step 5.0 Pass B) by delegating each block:
    - hand the block to the **`test-writer`** sub-agent (one unit, its cases, the `data-test-*` hooks);

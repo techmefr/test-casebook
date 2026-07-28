@@ -122,3 +122,5 @@ envAttrCleaner({
 ```
 
 Per environment: `development` keeps every attribute, `test` (CI) keeps only the test attributes, `staging` keeps test plus analytics, and `production` keeps only analytics (or nothing).
+
+**Server-rendered stacks (Laravel / Livewire / Blade / Folio)** have no bundler to hook `envAttrCleaner` into — the same per-environment behaviour is done with a Blade directive gated on `app()->environment()` instead. See `docs/testing-guide/laravel.md`.

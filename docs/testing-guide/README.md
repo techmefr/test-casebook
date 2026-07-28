@@ -24,9 +24,10 @@ This guide was created to **accelerate development** and improve **web applicati
 This guide is part of a progressive testing approach:
 
 1. **Phase 1: Nuxt + Vitest** (this guide)
-2. **Phase 2: Next.js + Vitest** (coming soon)
-3. **Phase 3: Debug & Troubleshooting** (coming soon)
-4. **Phase 4: E2E Tests** (coming soon)
+2. **Phase 2: React + Vitest** ([available](./react.md))
+3. **Phase 3: Laravel + Pest + Livewire** ([available](./laravel.md))
+4. **Phase 4: Debug & Troubleshooting** (coming soon)
+5. **Phase 5: E2E Tests** (coming soon)
 
 The idea is to start simple and progressively evolve towards more complex tests.
 

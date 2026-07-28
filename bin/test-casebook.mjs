@@ -1,6 +1,15 @@
 #!/usr/bin/env node
-import { cpSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
+import {
+  appendFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -42,6 +51,86 @@ function copyAsset(name) {
   return { copied, skipped };
 }
 
+function findGitRoot(from) {
+  let dir = from;
+  while (true) {
+    if (existsSync(join(dir, ".git"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+}
+
+const POINTER_MARKER = "test-casebook";
+
+function pointerBody(doctrinePath) {
+  return [
+    "## Testing doctrine (test-casebook)",
+    "",
+    `Tests in this repository follow the test-casebook playbook: \`${doctrinePath}\`. Read it before writing or reviewing any test. Non-negotiables:`,
+    "",
+    "- writing or modifying tests ALWAYS goes through the `test-casebook` skill: it builds the `task-test.md` plan, delegates each block to the `test-writer` sub-agent, and gates it with `test-reviewer` — never write a test file directly outside that flow",
+    "- select on `data-test-id` / `data-test-class` only — never CSS classes, tag structure, or visible text; add the hooks to the markup as you write the tests",
+    "- plan first in `task-test.md`, one assertion-bearing test per enumerated case",
+    "- isolated, deterministic tests: fresh seeded test store, mocked network, frozen time — never the app's real singleton store",
+    "- strict typing, no `any`, no blind `as`",
+    "- coverage floor 90%, enforced by thresholds — never lowered to pass",
+    "",
+  ].join("\n");
+}
+
+function ensurePointer(filePath, doctrinePath, results) {
+  const rel = relative(cwd, filePath) || filePath;
+  const body = pointerBody(doctrinePath);
+  if (!existsSync(filePath)) {
+    writeFileSync(filePath, body);
+    results.copied.push(rel);
+    return;
+  }
+  if (readFileSync(filePath, "utf8").includes(POINTER_MARKER)) {
+    results.skipped.push(rel);
+    return;
+  }
+  appendFileSync(filePath, `\n${body}`);
+  results.copied.push(rel);
+}
+
+function ensureRootHook(gitRoot, results) {
+  const hookRel = join(".claude", "hooks", "test-casebook-gate.mjs");
+  const hookDest = join(gitRoot, hookRel);
+  if (!existsSync(hookDest)) {
+    mkdirSync(dirname(hookDest), { recursive: true });
+    cpSync(join(pkgRoot, hookRel), hookDest);
+    results.copied.push(relative(cwd, hookDest));
+  }
+  const settingsDest = join(gitRoot, ".claude", "settings.json");
+  if (!existsSync(settingsDest)) {
+    cpSync(join(pkgRoot, ".claude", "settings.json"), settingsDest);
+    results.copied.push(relative(cwd, settingsDest));
+    return;
+  }
+  if (!readFileSync(settingsDest, "utf8").includes("test-casebook-gate")) {
+    console.log(
+      `\nNote: ${relative(cwd, settingsDest)} already exists — add the PreToolUse hook yourself:`,
+    );
+    console.log(
+      `  { "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "node .claude/hooks/test-casebook-gate.mjs" }] }`,
+    );
+  }
+}
+
+function scaffoldRootPointers(results) {
+  const gitRoot = findGitRoot(cwd);
+  if (!gitRoot) return;
+  const doctrineRel =
+    relative(gitRoot, join(cwd, "AGENTS.md")).split(sep).join("/");
+  ensurePointer(join(gitRoot, "CLAUDE.md"), doctrineRel, results);
+  if (gitRoot !== cwd) {
+    ensurePointer(join(gitRoot, "AGENTS.md"), doctrineRel, results);
+    ensureRootHook(gitRoot, results);
+  }
+}
+
 function init() {
   const copied = [];
   const skipped = [];
@@ -50,6 +139,7 @@ function init() {
     copied.push(...result.copied);
     skipped.push(...result.skipped);
   }
+  scaffoldRootPointers({ copied, skipped });
   console.log(`\ntest-casebook — scaffolded into ${cwd}\n`);
   if (copied.length) {
     console.log(`Added ${copied.length} file(s):`);

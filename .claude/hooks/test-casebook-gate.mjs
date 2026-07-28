@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+
+const chunks = [];
+for await (const chunk of process.stdin) chunks.push(chunk);
+
+let input = {};
+try {
+  input = JSON.parse(Buffer.concat(chunks).toString() || "{}");
+} catch {
+  process.exit(0);
+}
+
+const filePath = input?.tool_input?.file_path ?? "";
+const isJsTest = /\.(test|spec)\.[cm]?[jt]sx?$/.test(filePath);
+const isPestTest = /Test\.php$/.test(filePath) && /(^|\/)tests\//i.test(filePath);
+if (!isJsTest && !isPestTest) process.exit(0);
+
+let dir = dirname(filePath);
+while (true) {
+  if (existsSync(join(dir, "task-test.md"))) process.exit(0);
+  const atRepoRoot = existsSync(join(dir, ".git"));
+  const parent = dirname(dir);
+  if (atRepoRoot || parent === dir) break;
+  dir = parent;
+}
+
+console.error(
+  "test-casebook: no task-test.md plan found above this test file. Do not write tests directly — invoke the test-casebook skill: it builds the task-test.md plan first, then delegates each block to the test-writer sub-agent and gates it with test-reviewer before commit.",
+);
+process.exit(2);

@@ -1,6 +1,6 @@
 {
     "name": "test-casebook",
-    "version": "1.0.4",
+    "version": "1.0.6",
     "description": "Testing methodology and AI-agent playbook for exhaustive, data-test-driven test suites",
     "author": "techmefr",
     "license": "MIT",
@@ -23,6 +23,9 @@
         "claude-code",
         "playwright",
         "vitest",
+        "pest",
+        "laravel",
+        "livewire",
         "methodology",
         "data-attributes",
         "e2e"
