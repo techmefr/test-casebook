@@ -306,6 +306,130 @@ Don't write a case asserting that `wire:model` binds an input, that a Blade `@if
 
 ---
 
+## Worked example — a blog with roles and a private article
+
+The snippets above are single-case illustrations. This one is a full `task-test.md` block worked end to end — a permission-gated feature with more than two permission states, run for real against `vendor/bin/pest` (28/28 green) to make sure nothing here is aspirational.
+
+**The feature:** a blog. `User.role` is `admin` or `user`; "author" is not a stored role, it's whoever owns the article (`article.user_id`). An article can be `is_private`. Four permission states matter for every scenario: **admin**, **author** (owns *this* article), **user** (authenticated, not the author), **guest** (no session).
+
+### The policy — single source of truth for both layers
+
+```php
+class ArticlePolicy
+{
+    public function view(?User $user, Article $article): bool
+    {
+        if (! $article->is_private) {
+            return true;
+        }
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->isAdmin() || $user->id === $article->user_id;
+    }
+
+    public function update(User $user, Article $article): bool
+    {
+        return $user->isAdmin() || $user->id === $article->user_id;
+    }
+}
+```
+
+Routes enforce it at the HTTP layer; the Livewire components read the same gate to decide what to render — one policy, two enforcement points, exactly what Step 5.2 requires you to assert **both** of:
+
+```php
+Route::get('/articles/{article}', ArticleShow::class)->middleware('can:view,article');
+Route::get('/articles/{article}/edit', ArticleEdit::class)->middleware(['auth', 'can:update,article']);
+```
+
+The listing filters through the same gate instead of re-implementing the rule — so `Blog` and the route middleware can never disagree on who sees what:
+
+```php
+class Blog extends Component
+{
+    public function render()
+    {
+        $articles = Article::with('author')->latest()->get()
+            ->filter(fn (Article $article) => Gate::allows('view', $article))
+            ->values();
+
+        return view('livewire.blog', ['articles' => $articles]);
+    }
+}
+```
+
+### The matrix, as tests — dense on the refused cells
+
+One block, four permission states, both a public and a private article. Note the **non-primary-role case** Step 5.2 calls out explicitly: admin passes despite owning nothing.
+
+```php
+it('an admin sees both the public and the private article', function () {
+    $admin = User::factory()->admin()->create();
+    $author = User::factory()->create();
+    Article::factory()->for($author, 'author')->create(['title' => 'Public one']);
+    Article::factory()->for($author, 'author')->private()->create(['title' => 'Private one']);
+
+    Livewire::actingAs($admin)->test(Blog::class)
+        ->assertSee('Public one')
+        ->assertSee('Private one');
+});
+
+it('a user who is not the author sees only the public article', function () {
+    $author = User::factory()->create();
+    $otherUser = User::factory()->create();
+    Article::factory()->for($author, 'author')->create(['title' => 'Public one']);
+    Article::factory()->for($author, 'author')->private()->create(['title' => 'Private one']);
+
+    Livewire::actingAs($otherUser)->test(Blog::class)
+        ->assertSee('Public one')
+        ->assertDontSee('Private one');   // refused cell
+});
+```
+
+Weighting the refused cells (Step 5.2) means also asserting the save path is refused, not just hidden — a hidden button with an unprotected action behind it is the exact bug this step exists to catch:
+
+```php
+it('a user who is not the author is refused at the Livewire action level', function () {
+    $author = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $article = Article::factory()->for($author, 'author')->create(['title' => 'Old title']);
+
+    Livewire::actingAs($otherUser)->test(ArticleEdit::class, ['article' => $article])
+        ->set('title', 'Hacked title')
+        ->call('save')
+        ->assertForbidden();
+
+    expect($article->fresh()->title)->toBe('Old title');   // asserted at the data layer too
+});
+
+it('a user who is not the author is refused the edit route over HTTP', function () {
+    $author = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $article = Article::factory()->for($author, 'author')->create();
+
+    $this->actingAs($otherUser)
+        ->get("/articles/{$article->id}/edit")
+        ->assertForbidden();
+});
+
+it('a guest is redirected to login when hitting the edit route directly', function () {
+    $author = User::factory()->create();
+    $article = Article::factory()->for($author, 'author')->create();
+
+    $this->get("/articles/{$article->id}/edit")->assertRedirect('/login');
+});
+```
+
+Full block: 6 `LoginForm` cases, 5 `Blog` cases (empty / admin / author / user / guest), 9 `ArticleShow` cases (view gate × 4 states, edit-link visibility × 4 states, plus the happy path), 6 `ArticleEdit` cases (author saves, admin saves as non-owner, validation, refused at the action level, refused at the route level, guest redirected) — **28 tests, 51 assertions, all green**. That count is what "dense on the refused cells" looks like in practice: more permission-refusal cases than happy-path ones.
+
+### Gotcha hit building this: Livewire full-page components need a layout
+
+`Route::get(...)->middleware(...)` pointing straight at a Livewire component (no controller) renders that component as a full page, which requires `resources/views/layouts/app.blade.php` to exist (`{{ $slot }}` + `@livewireStyles`/`@livewireScripts`). Without it every route throws `No hint path defined for [layouts]` — not a test-casebook issue, but the kind of environment-setup gap Step 1/3 (detect the stack, install/configure the runner) is meant to catch before Pass B starts, so note it if scaffolding a fresh Laravel + Livewire project for the first time.
+
+---
+
 ## E2E (Pest Browser plugin or Dusk)
 
 Pest v4's browser plugin uses the global `visit()` helper (Playwright-backed), not `$this->visit()`, and `->type()`/`->click()`/`->press()` rather than `->fill()`:
