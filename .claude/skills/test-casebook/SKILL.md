@@ -17,7 +17,7 @@ You drive the test-casebook methodology on the **current (target) project**. The
    - hand the written block to the **`test-reviewer`** sub-agent (independent — never the agent that wrote it) before any commit;
    - if the reviewer rejects, send its findings back to `test-writer`, then re-review. Do **not** commit a rejected block.
    - commit one focused commit per approved block (test file + `data-test-*` hooks + ticked `task-test.md`).
-5. **Verify** (Step 6): run tests, enforce the 90% floor, run E2E, and — if the cleaner was installed — confirm the production strip by grep.
+5. **Verify** (Step 6): run tests, enforce the 80% floor, run E2E, and — if the cleaner was installed — confirm the production strip by grep.
 
 ## Delegation rules
 
@@ -27,4 +27,4 @@ You drive the test-casebook methodology on the **current (target) project**. The
 
 ## Definition of done
 
-Every box in `task-test.md` ticked, reviewed, and committed; coverage ≥ 90% and enforced; production build free of `data-test-*` (if the cleaner is used); every permission-gated unit covered by its permission matrix. See `AGENTS.md` → "Definition of done".
+Every box in `task-test.md` ticked, reviewed, and committed; coverage ≥ 80% and enforced; production build free of `data-test-*` (if the cleaner is used); every permission-gated unit covered by its permission matrix. See `AGENTS.md` → "Definition of done".

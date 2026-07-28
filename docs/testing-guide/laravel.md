@@ -22,10 +22,40 @@ php artisan pest:install
 For browser-level E2E, add either:
 
 ```bash
-composer require pestphp/pest-plugin-browser --dev   # Pest v3 browser plugin (Playwright-backed)
+composer require pestphp/pest-plugin-browser --dev   # Pest v4 browser plugin (Playwright-backed)
 # or
 composer require laravel/dusk --dev && php artisan dusk:install
 ```
+
+**Plain PHPUnit works unchanged.** Pest is built directly on top of PHPUnit — `pest:install` just adds a `Pest.php` bootstrap next to the existing `phpunit.xml`. A project that already has PHPUnit test classes (`class LoginTest extends TestCase { public function test_x(): void { ... } }`) does not need to migrate anything: the doctrine applies identically — `data-test-*` selectors, the `task-test.md` plan, the permission matrix, the no-comments rule, `RefreshDatabase`, `Http::fake()` — only the `it('...', fn () => ...)` syntax sugar is Pest-specific. Add Pest **alongside** PHPUnit test classes (both run under `vendor/bin/pest` / `vendor/bin/phpunit`) rather than rewriting a green suite just to get the `it()` syntax.
+
+### Static analysis gate — PHPStan / Larastan
+
+The JS guides enforce strict typing with `tsc`/ESLint (Pass B step 3: "no `any`, no blind `as`, type-check clean"). PHP's equivalent enforcement tool is **PHPStan**, with the Laravel-aware ruleset **Larastan**:
+
+```bash
+composer require larastan/larastan phpstan/phpstan --dev
+```
+
+```neon
+# phpstan.neon
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+        - tests
+    level: 8
+```
+
+Run it alongside the tests, same as the JS guides run lint alongside Vitest/Playwright:
+
+```bash
+vendor/bin/phpstan analyse --memory-limit=1G
+```
+
+`level: 8` is the strictest practical floor (catches missing return types, `mixed`-typed properties, unsafe `array` shapes) — the direct counterpart of TypeScript `strict: true`. Add `declare(strict_types=1);` to every file you write or touch, same rigor as banning `any`. Treat a PHPStan error the same as a failing type-check in the JS guides: fix the type, don't add a baseline-ignore to make it pass.
 
 ### phpunit.xml / Pest coverage
 
@@ -42,10 +72,10 @@ composer require laravel/dusk --dev && php artisan dusk:install
 </source>
 ```
 
-Run with a hard 90% floor, same as every other stack in this doctrine:
+Run with a hard 80% floor, same as every other stack in this doctrine:
 
 ```bash
-vendor/bin/pest --coverage --min=90
+vendor/bin/pest --coverage --min=80
 ```
 
 ### tests/Pest.php

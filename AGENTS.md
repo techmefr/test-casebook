@@ -21,11 +21,23 @@ When you finish, all of these must be true:
 2. The test runner(s) for the chosen layers are installed and configured.
 3. Components expose `data-test-id` / `data-test-class` per the conventions below.
 4. A `task-test.md` plan exists, lists every unit and its enumerated cases (see Step 5.0), and **every box in it is ticked, reviewed, and committed** — i.e. tests exist for every layer the project needs (unit, integration, E2E), **cover every branch and state of each unit under test**, are **strictly typed**, **pass**, and each block was validated by a review agent before its commit.
-5. Test coverage is **at least 90%** (lines and branches) and the runner is configured to **fail below that threshold** (see Step 6).
+5. Test coverage is **at least 80%** (lines and branches, see "Coverage floor" below) and the runner is configured to **fail below that threshold** (see Step 6).
 6. **If the cleaner was installed,** a production build contains **no** `data-test-*` attributes (verified by grep).
 7. Every **permission-gated** unit is covered by a **permission matrix** (Step 5.2) — scenario × permission state, expected from the plan, at least one *refused* state per gated capability, and every enforcement layer asserted — not a single happy-path state.
 
 Work through the steps in order. Do not skip verification.
+
+### Coverage floor
+
+The floor below is **80%** (lines and branches) unless this copy was scaffolded with a different value. It is a per-project setting, not a fixed constant — a team can raise or lower it for their own repo:
+
+```bash
+npx test-casebook init --coverage=85
+```
+
+This scaffolds `AGENTS.md` and the matching `docs/testing-guide/*.md` guide with every threshold (config blocks, CLI flags, prose) set to that number — applied consistently everywhere a coverage percentage appears in this playbook, not just in the config block. Omit `--coverage` to keep the shipped default. Re-run `npx test-casebook init --coverage=<n> --force` to change an already-scaffolded project's floor later.
+
+If you are applying this playbook by hand (no scaffolder — e.g. it was pasted or handed to you directly) and the user asks for a different floor, replace every coverage-threshold number you see below (the Vitest/Pest config blocks, the `--min=`/`--coverage` CLI flags, and the "at least N%" prose) with their number, consistently — do not leave some at the old value and others at the new one.
 
 ---
 
@@ -100,18 +112,19 @@ Install only the layers the project needs. Use the stack for the detected framew
 Then configure the runner:
 
 - **Vitest:** create `vitest.config.ts` with the framework plugin and `test.environment` (`jsdom`/`happy-dom`; for Nuxt use `environment: 'nuxt'` via `defineVitestConfig` from `@nuxt/test-utils/config`; for Astro use `getViteConfig` from `astro/config`).
-- **Coverage (every JS framework — React, Vue, Nuxt, Svelte, Astro):** all of these run on Vitest, so the coverage setup is the same everywhere. Enable it and set a hard **90%** floor so the suite fails below it — install `@vitest/coverage-v8` and add this `test.coverage` block to whichever Vitest config the framework uses above:
+- **Coverage (every JS framework — React, Vue, Nuxt, Svelte, Astro):** all of these run on Vitest, so the coverage setup is the same everywhere. Enable it and set a hard **80%** floor so the suite fails below it — install `@vitest/coverage-v8` and add this `test.coverage` block to whichever Vitest config the framework uses above:
   ```ts
   test: {
       coverage: {
           provider: 'v8',
           reporter: ['text', 'html'],
-          thresholds: { lines: 90, branches: 90, functions: 90, statements: 90 },
+          thresholds: { lines: 80, branches: 80, functions: 80, statements: 80 },
       },
   }
   ```
-  Scope coverage to the source you own (`coverage.include`) and exclude framework / vendor / generated / config files (`coverage.exclude`) so the 90% reflects only the code you wrote — not the framework's own (see Step 5.1).
-- **Laravel/Pest coverage:** no Vitest here — run `vendor/bin/pest --coverage --min=90` (add `<source><include><directory>app</directory></include></source>` to `phpunit.xml` so coverage is scoped to your own code, not vendor). See `docs/testing-guide/laravel.md`.
+  Scope coverage to the source you own (`coverage.include`) and exclude framework / vendor / generated / config files (`coverage.exclude`) so the 80% reflects only the code you wrote — not the framework's own (see Step 5.1).
+- **Laravel/Pest coverage:** no Vitest here — run `vendor/bin/pest --coverage --min=80` (add `<source><include><directory>app</directory></include></source>` to `phpunit.xml` so coverage is scoped to your own code, not vendor). See `docs/testing-guide/laravel.md`.
+- **Laravel/Pest static analysis:** the strict-typing gate (Pass B step 3) has no `tsc`/ESLint on PHP — install `larastan/larastan` (PHPStan with Laravel rules) at `level: 8` and run `vendor/bin/phpstan analyse` alongside the tests; treat a PHPStan error exactly like a failing type-check, never baseline-ignore it away. **Plain PHPUnit test classes need no migration** — Pest runs on top of PHPUnit, so existing `extends TestCase` suites keep working; the doctrine (selectors, plan, permission matrix, no comments) applies to them identically. See `docs/testing-guide/laravel.md`.
 - **Testing Library** keys `getByTestId` to a single attribute. Set it to `data-test-id` once in a test setup file so the unit/integration snippets below work:
   ```ts
   import { configure } from '@testing-library/dom'
@@ -256,7 +269,7 @@ Type every stub / handler to the real signature (Pass B step 3) — a stub that 
 **Don't test the framework — test your code.** Coverage and cases are about *your* logic, not the library's:
 - do **not** write cases that assert a framework / library feature works (that `v-if` toggles, that the router navigates, that a third-party UI component renders its own markup) — that is the framework's own test suite's job;
 - treat third-party components and the framework runtime as trusted boundaries — assert on **your** inputs to them and **your** handling of their outputs, not their internals;
-- exclude framework / vendor / generated code from coverage (`coverage.exclude`) so the 90% measures only the code you wrote.
+- exclude framework / vendor / generated code from coverage (`coverage.exclude`) so the 80% measures only the code you wrote.
 
 **Some effects aren't observable at unit level — send them to E2E, don't fake them.** A headless DOM (jsdom / happy-dom) does not compute layout or fully apply styling: CSS custom properties injected via `v-bind()` / `useCssVars`, values from real stylesheets, geometry, and paint are not serialized. If a case's only observable effect is one of these (e.g. a `fontSize` prop that just feeds a CSS variable), it **cannot** be asserted in a unit test. Do not select on a rendered style that the runner never produced, and do not invent a passing assertion. Cover the prop's *render* branches at unit level, assert the visual effect in **E2E**, and leave a one-line note on the skipped unit assertion per Step 5.0 — the same honesty rule as a genuinely unreachable path.
 
@@ -381,12 +394,12 @@ For deeper scenario snippets (forms, tables, modals, auth, i18n, state…), read
 ## Step 6 — Verify (do not skip)
 
 1. **Run the tests** with the project's commands; they must pass. Unit/integration run under `NODE_ENV=test`, where attributes are present. Run the project's lint too — the selector gate from Step 3 must pass with zero errors on the test files.
-2. **Run coverage and enforce the 90% floor:**
+2. **Run coverage and enforce the 80% floor:**
    ```bash
    pnpm vitest run --coverage      # or the project's coverage script
-   # must report ≥ 90% lines & branches and exit 0 (thresholds fail the run otherwise)
+   # must report ≥ 80% lines & branches and exit 0 (thresholds fail the run otherwise)
    ```
-   If coverage is below 90%, read the coverage report, find the uncovered lines/branches, and **go back to Step 5.0** — they map to cases missing from `task-test.md`. Add those cases and their tests; do not lower the threshold to pass.
+   If coverage is below 80%, read the coverage report, find the uncovered lines/branches, and **go back to Step 5.0** — they map to cases missing from `task-test.md`. Add those cases and their tests; do not lower the threshold to pass.
 3. **Run E2E** against a `development`/`test` build (attributes present).
 4. **Build for production and confirm the strip:**
    ```bash
@@ -409,7 +422,7 @@ If the grep finds anything, the cleaner is not wired correctly — recheck Step 
 - Do **not** skip the `task-test.md` plan and write tests straight from a guess — the plan, built from reading the source, is what makes coverage exhaustive instead of basic.
 - Do **not** ship loosely-typed tests. No `any`, no untyped fixtures/mocks, no blind `as`; reuse the production types and let the test file pass the project's type-check (see Step 5.0 Pass B).
 - Do **not** leave pre-existing tests untouched. A unit that already had tests is held to the same bar — audit each one against the case list, migrate it to `data-test-*` selectors and strict typing, and backfill every missing case (see Step 5.0 "Existing tests").
-- Do **not** lower or disable the 90% coverage threshold to make the suite pass. Below 90% means cases are missing — add the tests, don't move the bar.
+- Do **not** lower or disable the 80% coverage threshold to make the suite pass. Below 80% means cases are missing — add the tests, don't move the bar.
 - Do **not** test the framework or third-party libraries — they test themselves. Cover your own logic only, treat libraries as trusted boundaries, and exclude vendor/framework code from coverage (see Step 5.1).
 - Do **not** let tests touch the real network, clock, or shared state. Mock the network (MSW), seed stores, freeze time, and pin timezone/locale so tests are isolated and deterministic (see Step 5.1).
 - Do **not** trust a mock that has drifted from reality. Type fixtures from the real API contract so a mock of a non-existent method / endpoint, or a wrong response shape, fails at type-check — a lying mock greens the test while production breaks (see Step 5.1).

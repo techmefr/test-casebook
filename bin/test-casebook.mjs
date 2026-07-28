@@ -19,7 +19,27 @@ const args = process.argv.slice(2);
 const command = args[0];
 const force = args.includes("--force");
 
+const DEFAULT_COVERAGE = 80;
+const coverageArg = args.find((a) => a.startsWith("--coverage="));
+let coverage = DEFAULT_COVERAGE;
+if (coverageArg) {
+  const parsed = Number(coverageArg.split("=")[1]);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 100) {
+    console.error(
+      `test-casebook: --coverage must be an integer between 1 and 100 (got "${coverageArg.split("=")[1]}").`,
+    );
+    process.exit(1);
+  }
+  coverage = parsed;
+}
+
 const ASSETS = ["AGENTS.md", "docs", ".claude"];
+const COVERAGE_THRESHOLD_FILES = [
+  "AGENTS.md",
+  join("docs", "testing-guide", "laravel.md"),
+  join("docs", "testing-guide", "react.md"),
+  join(".claude", "skills", "test-casebook", "SKILL.md"),
+];
 
 function walk(dir) {
   const out = [];
@@ -74,9 +94,21 @@ function pointerBody(doctrinePath) {
     "- plan first in `task-test.md`, one assertion-bearing test per enumerated case",
     "- isolated, deterministic tests: fresh seeded test store, mocked network, frozen time — never the app's real singleton store",
     "- strict typing, no `any`, no blind `as`",
-    "- coverage floor 90%, enforced by thresholds — never lowered to pass",
+    `- coverage floor ${coverage}%, enforced by thresholds — never lowered to pass`,
     "",
   ].join("\n");
+}
+
+function applyCoverageThreshold(copiedFiles) {
+  if (coverage === DEFAULT_COVERAGE) return;
+  for (const rel of COVERAGE_THRESHOLD_FILES) {
+    if (!copiedFiles.includes(rel)) continue;
+    const dest = join(cwd, rel);
+    if (!existsSync(dest)) continue;
+    const content = readFileSync(dest, "utf8");
+    const updated = content.replace(/\b80\b/g, String(coverage));
+    if (updated !== content) writeFileSync(dest, updated);
+  }
 }
 
 function ensurePointer(filePath, doctrinePath, results) {
@@ -139,8 +171,12 @@ function init() {
     copied.push(...result.copied);
     skipped.push(...result.skipped);
   }
+  applyCoverageThreshold(copied);
   scaffoldRootPointers({ copied, skipped });
   console.log(`\ntest-casebook — scaffolded into ${cwd}\n`);
+  if (coverage !== DEFAULT_COVERAGE) {
+    console.log(`Coverage floor set to ${coverage}% (default is ${DEFAULT_COVERAGE}%).\n`);
+  }
   if (copied.length) {
     console.log(`Added ${copied.length} file(s):`);
     for (const file of copied) console.log(`  + ${file}`);
@@ -172,11 +208,14 @@ function init() {
 function usage() {
   console.log(`test-casebook — testing methodology scaffolder\n`);
   console.log(`Usage:`);
-  console.log(`  npx test-casebook init [--force]\n`);
+  console.log(`  npx test-casebook init [--force] [--coverage=<1-100>]\n`);
   console.log(
-    `  init     copy AGENTS.md, docs/ and .claude/ into the current project`,
+    `  init             copy AGENTS.md, docs/ and .claude/ into the current project`,
   );
-  console.log(`  --force  overwrite files that already exist\n`);
+  console.log(`  --force          overwrite files that already exist`);
+  console.log(
+    `  --coverage=<n>   set the coverage floor (default 80) across AGENTS.md and the scaffolded testing guides\n`,
+  );
 }
 
 if (command === "init") init();

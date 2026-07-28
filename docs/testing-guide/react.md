@@ -28,7 +28,7 @@ test: {
         reporter: ['text', 'html'],
         include: ['src/**', 'lib/**'],
         exclude: ['**/*.test.*', 'src/test/**'],
-        thresholds: { lines: 90, branches: 90, functions: 90, statements: 90 },
+        thresholds: { lines: 80, branches: 80, functions: 80, statements: 80 },
     },
 },
 ```

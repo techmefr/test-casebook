@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.7
+
+- **Coverage floor lowered to 80% (was 90%), and made configurable.** `npx test-casebook init --coverage=<1-100>` now rewrites every threshold occurrence (Vitest config blocks, Pest `--min=` flag, prose) in the scaffolded `AGENTS.md` and `docs/testing-guide/*.md` to the requested number in one pass, instead of leaving teams to hand-edit a hardcoded 90 across a dozen places. Omit the flag to keep the 80% default. `AGENTS.md` gained a "Coverage floor" section documenting the mechanism, including the by-hand fallback for when the playbook is pasted directly into an agent instead of scaffolded.
+- **PHPStan / Larastan as the PHP static-analysis gate.** The Laravel guide, `AGENTS.md` Step 3, and both `test-writer`/`test-reviewer` agents now name Larastan (PHPStan at `level: 8`) as the explicit counterpart to `tsc`/ESLint's strict-typing gate — a PHPStan error is treated exactly like a failing type-check (fix the type, never baseline-ignore).
+- **Plain PHPUnit test classes need no migration.** Documented in the Laravel guide and `AGENTS.md`: Pest runs on top of PHPUnit, so an existing `extends TestCase` suite keeps working as-is: the doctrine (selectors, plan, permission matrix, no comments) applies identically, Pest is additive.
+- **Fix — Pest v4 browser plugin syntax.** The Laravel guide's E2E snippet used an invented `$this->visit()->fill()` API; corrected to the real `visit()` global helper with `->type()`/`->click()`/`->press()`, verified against the pestphp/pest-plugin-browser docs.
+
 ## 1.0.6
 
 - **Laravel / Livewire / Blade / Folio support.** New Phase 3 guide (`docs/testing-guide/laravel.md`) covers Pest + `pest-plugin-laravel` + `pest-plugin-livewire` setup, `RefreshDatabase` as the fresh-store equivalent, `Livewire::test()` for component logic, `Http::fake()` typed from real API Resources/DTOs as the MSW counterpart, `Carbon::setTestNow()` for frozen-time boundary tests, the permission matrix driven through real policies/gates (`actingAs()` + route-level 403 assertions), and Folio page tests. `AGENTS.md` Step 1 now detects `laravel/framework` in `composer.json` and routes straight to Part B (no bundler, so the cleaner/Part A does not apply — server-rendered Blade has no build pipeline to strip attributes from; use a `@testattr` Blade directive gated on environment instead). Step 3 documents that PHP/Blade has no static-analysis equivalent of the JS selector-lint gate, so the rule is enforced at `test-reviewer` review time instead.
