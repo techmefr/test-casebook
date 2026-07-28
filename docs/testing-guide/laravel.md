@@ -278,17 +278,19 @@ Don't write a case asserting that `wire:model` binds an input, that a Blade `@if
 
 ## E2E (Pest Browser plugin or Dusk)
 
+Pest v4's browser plugin uses the global `visit()` helper (Playwright-backed), not `$this->visit()`, and `->type()`/`->click()`/`->press()` rather than `->fill()`:
+
 ```php
 it('user logs in', function () {
-    $this->visit('/login')
-        ->fill('[data-test-id="login-email-input"]', 'user@example.com')
-        ->fill('[data-test-id="login-password-input"]', 'secret123')
+    visit('/login')
+        ->type('[data-test-id="login-email-input"]', 'user@example.com')
+        ->type('[data-test-id="login-password-input"]', 'secret123')
         ->click('[data-test-id="login-submit"]')
         ->assertUrlIs('/dashboard');
 });
 ```
 
-(Dusk syntax differs slightly — `$browser->type()`/`->press()`/`->assertPathIs()` — but selects on the same `data-test-*` hooks.)
+(Dusk syntax differs — `$browser = $this->browse(fn ($browser) => ...)`, then `$browser->type()`/`->press()`/`->assertPathIs()` — but selects on the same `data-test-*` hooks.)
 
 ---
 
