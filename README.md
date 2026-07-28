@@ -6,6 +6,23 @@
 
 It pairs with [`env-attr-cleaner`](https://github.com/techmefr/env-attr-cleaner) — the build-time tool that strips `data-test-*` attributes from production, on bundler-based JS stacks (Nuxt, Vue, React, Next.js, Svelte, Astro, Bun). The dependency is **one-way**: the methodology knows about the cleaner, the cleaner knows nothing about the methodology. Server-rendered stacks with no JS bundler (Laravel / Livewire / Blade / Folio) skip the cleaner entirely and go straight to the testing methodology — see `docs/testing-guide/laravel.md`.
 
+## Supported stacks (auto-detected)
+
+Hand this repo to an agent — Claude Code or otherwise — and tell it to use `test-casebook` for testing. `AGENTS.md` Step 1 reads the target project's `package.json` / `composer.json` and **auto-detects the stack**, no manual setup required:
+
+| Stack | Auto-detected | Dedicated guide | Cleaner (Part A) |
+|---|---|---|---|
+| Nuxt | ✅ | [`docs/testing-guide/README.md`](docs/testing-guide/README.md) | ✅ `env-attr-cleaner` |
+| React / Next.js | ✅ | [`docs/testing-guide/react.md`](docs/testing-guide/react.md) | ✅ `env-attr-cleaner` |
+| Vue (no Nuxt) | ✅ | — (Nuxt guide's snippets adapt directly, see `AGENTS.md` Step 5's per-framework equivalents) | ✅ `env-attr-cleaner` |
+| Svelte | ✅ | — (same, adapt from `AGENTS.md` Step 3/5) | ✅ `env-attr-cleaner` |
+| Astro | ✅ | — (same; uses Astro's Container API, no extra DOM lib) | ✅ `env-attr-cleaner` |
+| Bun (runtime build) | ✅ | — | ✅ `env-attr-cleaner-bun` |
+| Laravel / Livewire / Blade / Folio | ✅ | [`docs/testing-guide/laravel.md`](docs/testing-guide/laravel.md) | N/A — no bundler, see the guide's Blade-directive alternative |
+| **Angular** | ❌ **Not supported** — `env-attr-cleaner` cannot strip Angular templates; `AGENTS.md` Step 1 stops immediately on detecting `@angular/core` | — | ❌ |
+
+So yes: **Astro, Svelte, React, Next.js, Vue, Nuxt, Laravel and Livewire are all covered automatically** the moment the agent reads `AGENTS.md` — the only stack excluded on purpose is Angular. Nuxt, React and Laravel additionally ship a full cookbook (`docs/testing-guide/*.md`) with copy-paste snippets; the other JS stacks follow the same playbook with the per-framework adaptations spelled out in `AGENTS.md` Steps 1, 3 and 5 (render API, coverage config, etc.) rather than their own dedicated file.
+
 ## What's inside
 
 - **`AGENTS.md`** — the playbook. Handed to an AI coding agent, it drives: detect the stack, (optionally) wire the cleaner, plan every case in `task-test.md`, execute block by block with a reviewer, enforce strict typing and coverage, and verify. Includes the permission matrix for permission-gated units and the anti-mock-drift rules.
