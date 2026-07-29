@@ -36,17 +36,22 @@ That drops `AGENTS.md`, `docs/`, and `.claude/` (skill + agents) into your proje
 
 Nuxt, React and Laravel additionally ship a full cookbook with copy-paste snippets; the other JS stacks follow the same playbook with adaptations spelled out directly in `AGENTS.md`.
 
+<details>
+<summary>What a run actually looks like (Laravel/Livewire worked example)</summary>
+
+```
+$ php artisan test
+...
+Tests:    28 passed (72 assertions)
+Duration: 4.12s
+```
+
+Full walkthrough, including the permission-matrix (roles + a private article) it was run against, in [`docs/testing-guide/laravel.md`](docs/testing-guide/laravel.md).
+</details>
+
 ## Get involved
 
-**Contributions are very welcome — this doctrine only gets sharper by running into real projects.** No permission or big change needed: a one-line fix, a missing case, a new guide all count.
-
-- **Write the cookbook your stack is missing** — Vue, Svelte, Astro and Bun are auto-detected but have no dedicated guide yet. Highest-value contribution right now.
-- **Fix a drifted snippet** — every example here should match the real API it names.
-- **Tell us where a rule doesn't fit** — if a Step in `AGENTS.md` conflicts with a real codebase, open an issue.
-- **Report scaffolder or hook bugs** — `bin/test-casebook.mjs` and `.claude/hooks/test-casebook-gate.mjs` are plain Node scripts.
-- **Share a worked example** — the Laravel guide's permission-matrix run (roles + a private article, 28/28 green) started this way.
-
-Fork, branch, PR against `main`. Mention what you verified it against — a real running project beats reasoning from the docs.
+**Contributions are very welcome — this doctrine only gets sharper by running into real projects.** No permission or big change needed: a one-line fix, a missing case, a new guide all count — see [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Core idea
 
@@ -78,6 +83,13 @@ Three channels, one source of truth (this repo's `AGENTS.md` + docs):
 ## Status
 
 Pre-release (not yet published to npm). Usable today via the Claude Code skill, the scaffolder (`node bin/test-casebook.mjs init`), or by handing `AGENTS.md` to any agent; marketplace packaging is in progress.
+
+## Same doctrine, other stacks
+
+Same method — plan first, exhaustive not happy-path, permission matrix dense on refused cases, independent review gate, enforced coverage floor — ported to each ecosystem's own tooling:
+
+- [`test-casebook-back-php`](https://github.com/techmefr/test-casebook-back-php) — PHP backends
+- [`test-casebook-back-js`](https://github.com/techmefr/test-casebook-back-js) — Node/TypeScript backends
 
 ## License
 
