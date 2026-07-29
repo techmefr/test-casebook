@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0
+
+- **Seventh worked example: Hapi**, same blog-idea scenario built with Hapi's native `server.auth.scheme`/`server.auth.strategy`/`server.auth.default` abstraction and Joi route-level validation instead of a hook/middleware pattern. **47/47 tests green (9 unit + 38 functional), `tsc --noEmit` clean, ESLint clean, 100% line coverage.** See [`docs/testing-guide/hapi.md`](docs/testing-guide/hapi.md).
+- **Real finding: `@hapi/hapi` now ships its own bundled types (v21+)** — a separately-installed `@types/hapi__hapi` stub was found stale (labeled for Hapi 20.0 against an installed 21.4.10) and was removed rather than reconciled. `AGENTS.md` Step 3 updated with a general rule: check a package's own `types`/`typings` field before assuming `@types/<package>` is needed.
+- **Real finding: `request.headers.authorization` types as `{}` under `strict: true`** in Hapi's own bundled types — fixed with an explicit `as string | undefined` cast, the same "read the framework's actual types, don't assume" principle as the earlier `jsonwebtoken` `sub`-is-a-string gotcha.
+- **Real finding, empirically confirmed rather than assumed: Hapi's own `server.inject()` hangs under blanket `jest.useFakeTimers()`**, exactly like Fastify's `app.inject()`. Verified with a throwaway timeout-triggering test before applying the fix to the real scheduling suite. This is now a three-way-confirmed hazard (a real-socket client in tRPC/GraphQL, and two different frameworks' own native in-process injection helpers in Fastify/Hapi) — `AGENTS.md` Step 4 updated to state the rule applies broadly, not framework-by-framework.
+- **Documents Hapi's validation-failure status code (400)**, confirmed by running the tests rather than assumed from another framework's convention, and Hapi's choice of Joi as a first-class route option rather than a manual in-handler call — its own idiomatic default, chosen deliberately for variety after five prior Zod-based examples.
+- Added Hapi's detection row to `AGENTS.md`'s stack table.
+
 ## 0.6.0
 
 - **Sixth worked example: Fastify**, same blog-idea scenario, hand-rolled auth via an `onRequest` hook and `decorateRequest`, manual Zod validation. **47/47 tests green (9 unit + 38 functional), `tsc --noEmit` clean, ESLint clean, 98.29% line coverage.** See [`docs/testing-guide/fastify.md`](docs/testing-guide/fastify.md).
