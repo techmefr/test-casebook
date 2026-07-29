@@ -1,5 +1,9 @@
 # test-casebook
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Stacks covered](https://img.shields.io/badge/stacks%20covered-7-brightgreen.svg)](#supported-stacks-auto-detected)
+[![Status](https://img.shields.io/badge/status-pre--release-orange.svg)](#status)
+
 **A playbook that stops an AI from writing happy-path-only tests for your frontend.**
 
 Most "AI, write my tests" runs stop at a few green checks on the components that were easy to reach — permissions, edge cases, and refactor-fragile selectors left untested. `test-casebook` forces an agent to plan every case from the source *before* writing anything, drive tests through dedicated `data-test-*` attributes that stay stable across refactors, and enforce strict typing and a real coverage floor.
