@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- **Fourth worked example: tRPC**, same blog-idea scenario built as tRPC procedures over an Express HTTP adapter (`@trpc/server/adapters/express`), Zod-validated inputs, a hand-rolled JWT-based context. **48/48 tests green (9 unit + 39 functional), `tsc --noEmit` clean, ESLint clean, 100% line coverage.** See [`docs/testing-guide/trpc.md`](docs/testing-guide/trpc.md).
+- **Deliberately tests the persona matrix through a real HTTP round-trip** (`@trpc/client`'s `httpBatchLink` against a real listening server) rather than tRPC's own idiomatic in-process `router.createCaller(ctx)` pattern — a hand-built caller context would be exactly as circular as unit-testing a Guard by calling it directly. Documented as an explicit doctrine point in `AGENTS.md`'s tRPC detection row.
+- **Real bug found and fixed**: blanket `jest.useFakeTimers()` hung every test in the scheduling suite, because faking Jest's timer functions also disables the timer machinery Node's own HTTP/net stack uses to drive real socket I/O — invisible in the Express/Adonis examples since those used `supertest` (in-process request injection, no real socket). Fixed with a `doNotFake` list that freezes only `Date`/`Date.now()`. Documented in `AGENTS.md` Step 4 as a general finding for any test that opens a real socket in-process alongside a faked clock, not just tRPC specifically.
+- Same `jsonwebtoken` `sub`-is-a-string `strict`-mode catch as the Express example, confirmed independently.
+- Documented that tRPC's Zod-input validation failures surface automatically as `TRPCError({ code: 'BAD_REQUEST' })` with no manual `safeParse` call needed, and that a tRPC client's real error contract is `.data.code`/`.data.httpStatus`, not a raw HTTP status — assertions in this example target `.data.code`.
+- Pinned `@trpc/server`/`@trpc/client` to matching v10 versions (peer-dependency exact-match requirement) and TypeScript to 5.x (`ts-jest`'s current peer range doesn't yet support TypeScript 7, which is what a bare `npm install typescript` now resolves to).
+
 ## 0.3.0
 
 - **Third worked example: plain Express** (no framework), same blog-idea scenario — roles, a private article, scheduled publishing, comments with an owner notification, this time with hand-rolled auth/authorization middleware (no DI, no decorators) and Zod validation. **47/47 tests green (8 unit + 39 functional), `tsc --noEmit` clean, ESLint clean, 97.5% line coverage.** See [`docs/testing-guide/express.md`](docs/testing-guide/express.md).
