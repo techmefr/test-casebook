@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- **Fifth worked example: GraphQL**, same blog-idea scenario built as an Apollo Server v4 schema/resolver pair mounted on Express, Zod business-rule validation on top of GraphQL's own schema-structural validation, a hand-rolled JWT-based context. **47/47 tests green (9 unit + 38 functional), `tsc --noEmit` clean, ESLint clean, 98.47% line coverage.** See [`docs/testing-guide/graphql.md`](docs/testing-guide/graphql.md).
+- **Documents GraphQL's two distinct validation layers** as a genuine cross-framework finding — schema-structural (required/undeclared fields, enforced by GraphQL itself before any resolver runs, no `.strict()` equivalent needed) versus business-rule (value-level checks the type system can't express, e.g. non-empty strings). `AGENTS.md`'s new GraphQL detection row requires both be enumerated as separate `task-test.md` cases.
+- **Documents that Apollo Server always returns HTTP 200**, even for a failed operation — the real outcome lives in `errors[].extensions.code`. Every test in this example asserts on that field, never on HTTP status, mirroring the tRPC example's `.data.code` finding: RPC-shaped protocols put the real outcome in a typed error code inside a uniformly-200 envelope, unlike REST.
+- **Real dependency-version trap found and fixed**: two different `@types/express` versions resolved simultaneously in the same `npm install` (Apollo's own nested dependency vs. this project's unpinned root install) produced a wall of confusing `tsc` overload-mismatch errors with no code-level cause. Fixed by pinning the root `@types/express` to the version Apollo's Express integration expects. Documented in `AGENTS.md` Step 3 as the `@types/*` counterpart of the existing "ORM major-version API drift" gotcha.
+- Confirmed the tRPC worked example's `jest.useFakeTimers({ doNotFake: [...] })` fix (for a real in-process socket alongside a faked clock) transfers unchanged to this second, independent real-HTTP-client testing setup — validating that the `AGENTS.md` guidance is genuinely general, not tRPC-specific.
+- Also confirmed, independently, that Apollo Server v5 dropped its Express integration package entirely (only `startStandaloneServer` remains) — this project pins v4 specifically to keep mounting on Express like every other example in this doctrine.
+
 ## 0.4.0
 
 - **Fourth worked example: tRPC**, same blog-idea scenario built as tRPC procedures over an Express HTTP adapter (`@trpc/server/adapters/express`), Zod-validated inputs, a hand-rolled JWT-based context. **48/48 tests green (9 unit + 39 functional), `tsc --noEmit` clean, ESLint clean, 100% line coverage.** See [`docs/testing-guide/trpc.md`](docs/testing-guide/trpc.md).
