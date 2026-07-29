@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- **Third worked example: plain Express** (no framework), same blog-idea scenario — roles, a private article, scheduled publishing, comments with an owner notification, this time with hand-rolled auth/authorization middleware (no DI, no decorators) and Zod validation. **47/47 tests green (8 unit + 39 functional), `tsc --noEmit` clean, ESLint clean, 97.5% line coverage.** See [`docs/testing-guide/express.md`](docs/testing-guide/express.md).
+- **Real environment finding: `better-sqlite3` segfaulted in this build environment**, reproducible with a two-line standalone script independent of this project's code, surviving both `npm rebuild --build-from-source` and forcing the shipped prebuilt binary. Rather than fight a broken native binding, fell back to a plain in-memory JS store (arrays + id counters) — a legitimate choice already anticipated by the doctrine's own "no ORM detected → adapt to raw driver or in-memory store" guidance, now made explicit in `AGENTS.md`'s detection table as a named fallback for exactly this situation.
+- **Real `strict`-mode finding**: `jsonwebtoken`'s `JwtPayload.sub` is typed `string | undefined`, not `number` — signing a token with a numeric user id compiles under loose settings but `strict: true` correctly flags the later lookup as a type mismatch. Documented with the fix (sign/compare via `String(id)`) in `AGENTS.md` Step 3.
+- Documented that Express has no framework validation-failure convention to fall back on — this project's own choice (422, matching the AdonisJS example) had to be read from the code, not assumed.
+- The persona matrix, JWT-expiry-under-fake-time isolation case (with a dedicated test proving a token minted before a `jest.setSystemTime()` jump is correctly rejected), and Jest's native `spyOn` for the notification test are all documented in the new testing guide.
+
 ## 0.2.0
 
 - **Second worked example: AdonisJS 6** (`create-adonisjs --kit=api`), same blog-idea scenario as the NestJS example — roles (admin/author/member), a private article, scheduled publishing, comments with an owner notification. **39/39 tests green (9 unit + 30 functional), `tsc --noEmit` clean, ESLint clean, 100% line coverage** on every file the scenario touches (policies, controllers, services, listeners, events, validators). See [`docs/testing-guide/adonisjs.md`](docs/testing-guide/adonisjs.md).

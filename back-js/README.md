@@ -15,7 +15,7 @@ The **core** (`AGENTS.md` Steps 1–6) applies to **any Node/TS backend** — pl
 | `vitest` | Use Vitest | Default: Jest (Nest's own CLI default) |
 | `@japa/runner` | Use Japa — AdonisJS's real test runner, not Jest/Vitest | N/A |
 | `strict` in `tsconfig.json` | Already the definition-of-done bar | Turn it on — part of Step 3, not optional |
-| An ORM (`typeorm`, `@prisma/client`, `drizzle-orm`) | Seed personas through its repository API | Adapt to whatever the project actually uses (raw driver, in-memory store) |
+| An ORM (`typeorm`, `@prisma/client`, `drizzle-orm`) | Seed personas through its repository API | Adapt to whatever the project actually uses (raw driver, in-memory store) — and if a native-dependency DB library misbehaves in the execution environment, an in-memory store is a legitimate fallback, not a downgrade |
 
 **Not every Node backend runs NestJS or an ORM.** Those are real and valuable, but this doctrine is written so a plain Express + Jest project gets the full core method without being handed instructions for packages it doesn't have.
 
@@ -28,6 +28,7 @@ The **core** (`AGENTS.md` Steps 1–6) applies to **any Node/TS backend** — pl
 - **`docs/conventions.md`** — test naming, the `task-test.md` shape, persona naming.
 - **`docs/testing-guide/nestjs.md`** — the first real worked example: a NestJS Article API (roles, a private article, scheduled publishing, comments + notification), run for real: 40/40 tests green (9 unit + 31 e2e), `tsc --noEmit` clean under `strict: true`, ESLint clean, 98.84% line coverage — well above the 80% floor. Found two genuine, non-obvious things: a fresh Nest CLI scaffold ships `strict: false` by default, and advancing a fake clock forward in an isolation test silently expires any JWT minted before the jump (a hazard the PHP-back doctrine's `actingAs()`-based tests never had, since that helper doesn't mint an expiring credential).
 - **`docs/testing-guide/adonisjs.md`** — the second worked example, same scenario ported to AdonisJS 6 (`--kit=api`): 39/39 tests green (9 unit + 30 functional), `tsc --noEmit`/ESLint clean, 100% coverage on every file the scenario touches. Confirmed AdonisJS's real test runner is **Japa**, not Jest/Vitest, and found three genuine integration bugs: Japa's request-builder assertion methods only exist on the resolved response (not chainable like supertest), a `HOST=localhost` binds IPv6 while Japa's client defaults to IPv4 (`ECONNREFUSED`), and overriding Luxon's `Settings.now` with a closure that itself calls a Luxon API recurses infinitely.
+- **`docs/testing-guide/express.md`** — the third worked example, same scenario on plain Express (no framework, hand-rolled auth/authorization middleware, Zod validation): 47/47 tests green (8 unit + 39 functional), `tsc --noEmit`/ESLint clean, 97.5% line coverage. `better-sqlite3` segfaulted in the build environment (reproducible standalone, independent of this project's code) — fell back to a plain in-memory JS store per the doctrine's own no-ORM guidance rather than fighting a broken native binding. Also found a real `strict`-mode catch: `jsonwebtoken`'s `sub` claim is typed `string`, not `number`.
 - **`bin/casebook-back-js-init.mjs`** — scaffolder: copies `AGENTS.md`, `docs/` and `.claude/` into a target project, with a `--coverage=<1-100>` flag. Tested for real: default copy, skip-existing (without `--force`), `--coverage=90` applied cleanly, an out-of-range value rejected with exit code 1.
 
 ## How it's consumed
@@ -40,7 +41,7 @@ No installable npm package yet (no `npx casebook-back-js init` wrapper) — a na
 
 ## Status
 
-Two worked examples run end-to-end so far: NestJS (Docker-free, native Node 18 — 40/40 tests green, `tsc --noEmit`/ESLint clean, 98.84% line coverage) and AdonisJS 6 (via Docker, since `create-adonisjs` requires Node ≥24 — 39/39 tests green, `tsc --noEmit`/ESLint clean, 100% coverage on scenario code). Express is the natural next pass, following the same "real project, real Docker-or-native run, honestly-scoped findings" discipline.
+Three worked examples run end-to-end so far: NestJS (Docker-free, native Node 18 — 40/40 tests green, `tsc --noEmit`/ESLint clean, 98.84% line coverage), AdonisJS 6 (via Docker, since `create-adonisjs` requires Node ≥24 — 39/39 tests green, `tsc --noEmit`/ESLint clean, 100% coverage on scenario code), and Express (Docker-free, native Node 18 — 47/47 tests green, `tsc --noEmit`/ESLint clean, 97.5% line coverage, in-memory data layer after a native-binding segfault ruled out `better-sqlite3` in this environment).
 
 ## Contributing
 
