@@ -1,30 +1,23 @@
-# Next session — split repos + start test-casebook-back-js
+# Next session — split repos into their own history
 
-Picks up from [`architecture-decision.md`](architecture-decision.md). Concrete steps, in order:
+Picks up from [`architecture-decision.md`](architecture-decision.md). `test-casebook-back-js` (steps 2–3 of the original plan) is now built, under `back-js/` on this same branch, at the same rigor as the PHP side — see its own `README.md`/`CHANGELOG.md`. What's left is purely mechanical: splitting `back/` and `back-js/` out into their own repos.
 
-## 1. Split `test-casebook-back` out into its own repo
+## 1. Split `test-casebook-back` (PHP) out into its own repo
 
 - The content currently lives as the `back/` folder on the `back-doctrine-exploration` branch of this repo (`test-casebook`).
 - Create a new `test-casebook-back` repo (empty, own history) and copy `back/`'s contents (`AGENTS.md`, `docs/`, `.claude/`, `bin/`, `README.md`, `CHANGELOG.md`) into its root — don't carry over this repo's git history, start clean since `back/` was always meant to become independent.
-- Update `test-casebook`'s own `README.md` with a short "sibling repos" pointer to `test-casebook-back` (PHP) and `test-casebook-back-js` (JS) once both exist.
 - Once copied and verified, the `back/` folder and `back-doctrine-exploration` branch in this repo can be deleted.
 
-## 2. Create `test-casebook-back-js`
+## 2. Split `test-casebook-back-js` out into its own repo
 
-Same doctrine as `test-casebook-back`, ported to the JS/TS backend ecosystem instead of PHP — npm instead of Composer, Vitest/Jest instead of PHPUnit/Pest, no static frontend concerns (no component testing, no accessibility, no Playwright — that stays in `test-casebook`).
+- The content lives as the `back-js/` folder on the `repo-architecture-decision` branch of this repo.
+- Create a new `test-casebook-back-js` repo (empty, own history) and copy `back-js/`'s contents into its root — same reasoning as step 1, clean history.
+- Once copied and verified, the `back-js/` folder can be deleted from this repo (the `repo-architecture-decision` branch itself can also go, or be kept as a record of the decision — your call).
 
-Base scaffold to bring over conceptually from `test-casebook-back` (adapt, don't copy verbatim):
-- `AGENTS.md` — same core steps (detect stack, confirm runner, static analysis if present, plan-first `task-test.md`, persona matrix, coverage floor, review gate), detection table becomes: `NestJS`/`AdonisJS`/`Express` (framework), `vitest`/`jest` (runner, detect from `package.json`), `eslint`/`typescript strict mode` (the tsc-equivalent gate), a permission/auth library per framework (Nest Guards, Adonis Bouncer/policies, or whatever Express project actually uses — likely bespoke middleware, don't assume a package).
-- `.claude/skills/test-casebook-back-js/` + `.claude/agents/{test-writer-back-js,test-reviewer-back-js}`.
-- `.claude/hooks/test-casebook-back-js-gate.mjs` — same plan-gate logic as the PHP one, just re-pointed at this ecosystem's test file naming convention (confirm exact pattern once the first framework is chosen — likely `*.spec.ts` or `*.test.ts` under `tests/` or colocated, needs checking per framework rather than assumed).
-- `bin/casebook-back-js-init.mjs` (or `.ts`) — scaffolder, same `--coverage=<n>` flag pattern.
-- `docs/strategy.md`, `docs/conventions.md`.
-- `docs/testing-guide/<framework>.md` per framework, starting with whichever is picked first (Nest, Adonis, or Express).
+## 3. Update `test-casebook`'s own README
 
-## 3. First framework worked example
-
-Same rigor as the PHP side — a real project, run for real in Docker (or directly if Node is available on the host, unlike PHP), a persona matrix (roles/guards), validation, isolation cases, coverage measured for real, not assumed.
+Add a short "sibling repos" pointer to `test-casebook-back` (PHP) and `test-casebook-back-js` (JS) once both exist as independent repos, so anyone landing on the frontend repo understands the landscape without asking.
 
 ## Open question for next session
 
-Which framework first — NestJS, AdonisJS, or Express? Decided together or left to whoever picks this up (the user's own Claude Code session, per today's plan).
+Whether to keep `AdonisJS`/`Express` worked examples in `test-casebook-back-js`'s scope for a near-term follow-up, or leave that for whoever picks up work on that repo next — the NestJS one (the first, already built) is enough to prove the doctrine works end to end.
