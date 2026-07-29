@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.0
+
+- **Eighth worked example: Koa**, same blog-idea scenario built on Koa — the leanest core of any framework covered so far, with no built-in router, body parser, or auth. **47/47 tests green (9 unit + 38 functional), `tsc --noEmit` clean, ESLint clean, 100% line coverage.** See [`docs/testing-guide/koa.md`](docs/testing-guide/koa.md).
+- **Real finding: `ctx.throw()`'s `never` return type only narrows TypeScript control flow when the enclosing middleware/handler's `ctx` parameter is explicitly typed.** Isolated with a minimal reproduction: the same guard clause narrows cleanly with an annotated `(ctx: Koa.Context, next) => {...}` parameter but silently fails to narrow when the parameter is left inferred from `app.use(...)`'s own overloaded signature — even though both types are structurally identical. Fixed by explicitly typing every middleware/route-handler `ctx` parameter. `AGENTS.md` updated with a general rule about `never`-typed guard functions and parameter annotation.
+- **Real finding: `@koa/router` ships its own bundled types now**, same as `@hapi/hapi` — `@types/koa__router` was redundant and removed. `koa` itself, however, still has no bundled types and genuinely needs `@types/koa` — a reminder to check per-package, not per-ecosystem, since Koa's own official router package made a different choice than Koa core.
+- **Confirms the fake-timers hazard a fourth time**, this time via `supertest` against `app.callback()` (a real socket, like tRPC/GraphQL/Express) rather than a framework's own in-process injector — the same `doNotFake` fix applies unchanged.
+- Added Koa's detection row to `AGENTS.md`'s stack table. This closes the originally planned JS/TS backend framework queue (NestJS, AdonisJS, Express, tRPC, GraphQL, Fastify, Hapi, Koa).
+
 ## 0.7.0
 
 - **Seventh worked example: Hapi**, same blog-idea scenario built with Hapi's native `server.auth.scheme`/`server.auth.strategy`/`server.auth.default` abstraction and Joi route-level validation instead of a hook/middleware pattern. **47/47 tests green (9 unit + 38 functional), `tsc --noEmit` clean, ESLint clean, 100% line coverage.** See [`docs/testing-guide/hapi.md`](docs/testing-guide/hapi.md).
