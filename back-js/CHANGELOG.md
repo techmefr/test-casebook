@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0
+
+- **Second worked example: AdonisJS 6** (`create-adonisjs --kit=api`), same blog-idea scenario as the NestJS example — roles (admin/author/member), a private article, scheduled publishing, comments with an owner notification. **39/39 tests green (9 unit + 30 functional), `tsc --noEmit` clean, ESLint clean, 100% line coverage** on every file the scenario touches (policies, controllers, services, listeners, events, validators). See [`docs/testing-guide/adonisjs.md`](docs/testing-guide/adonisjs.md).
+- **Confirmed AdonisJS's real test runner is Japa (`@japa/runner`), not Jest or Vitest** — added as an explicit detection row in `AGENTS.md`'s stack table; a doctrine that only checks for `jest`/`vitest` would misdetect the runner on every Adonis project.
+- Found and documented three real, non-obvious integration bugs surfaced by actually running the suite:
+  - **Japa's request-builder assertion methods (`.assertStatus()`, etc.) only exist on the resolved response**, not the pending request builder — unlike supertest's fully chainable API. Every functional test awaits the request into a variable first.
+  - **`HOST=localhost` binds the test server on IPv6 while Japa's API client defaults to IPv4**, producing `ECONNREFUSED` on every functional test despite the server genuinely starting — fixed via `HOST=127.0.0.1` in `.env.test`.
+  - **Overriding Luxon's `Settings.now` with a closure that itself calls a Luxon API (`DateTime.fromISO`) recurses infinitely** — fixed by computing the frozen timestamp with a plain `Date` outside the override closure.
+- Documented two cross-framework comparison points: VineJS's default validation-failure status is 422 (vs Nest's 400), and Bouncer policies/controllers are auto-indexed via codegen rather than manually registered.
+- Coverage measured via `c8` (Japa has no built-in `--coverage` flag), documented in `AGENTS.md`'s Japa detection row.
+
 ## 0.1.0
 
 - **Initial release.** `AGENTS.md` (core doctrine: detect stack, confirm Jest/Vitest, TypeScript strict + ESLint, plan-first `task-test.md`, persona matrix for permission-gated units, coverage floor, review gate), `docs/strategy.md`, `docs/conventions.md`, `.claude/skills/test-casebook-back-js/`, `.claude/agents/{test-writer-back-js,test-reviewer-back-js}`, the plan-gate hook, and `bin/casebook-back-js-init.mjs`.

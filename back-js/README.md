@@ -13,6 +13,7 @@ The **core** (`AGENTS.md` Steps 1–6) applies to **any Node/TS backend** — pl
 | `@nestjs/core` | Use Nest Guards/decorators/DI conventions | Adapt to the project's own framework (Adonis Bouncer, bespoke Express middleware) |
 | `@adonisjs/core` | Use Adonis Bouncer policies | N/A |
 | `vitest` | Use Vitest | Default: Jest (Nest's own CLI default) |
+| `@japa/runner` | Use Japa — AdonisJS's real test runner, not Jest/Vitest | N/A |
 | `strict` in `tsconfig.json` | Already the definition-of-done bar | Turn it on — part of Step 3, not optional |
 | An ORM (`typeorm`, `@prisma/client`, `drizzle-orm`) | Seed personas through its repository API | Adapt to whatever the project actually uses (raw driver, in-memory store) |
 
@@ -26,6 +27,7 @@ The **core** (`AGENTS.md` Steps 1–6) applies to **any Node/TS backend** — pl
 - **`docs/strategy.md`** — why this doctrine, and why it's a third sibling repo rather than folding into either of the other two.
 - **`docs/conventions.md`** — test naming, the `task-test.md` shape, persona naming.
 - **`docs/testing-guide/nestjs.md`** — the first real worked example: a NestJS Article API (roles, a private article, scheduled publishing, comments + notification), run for real: 40/40 tests green (9 unit + 31 e2e), `tsc --noEmit` clean under `strict: true`, ESLint clean, 98.84% line coverage — well above the 80% floor. Found two genuine, non-obvious things: a fresh Nest CLI scaffold ships `strict: false` by default, and advancing a fake clock forward in an isolation test silently expires any JWT minted before the jump (a hazard the PHP-back doctrine's `actingAs()`-based tests never had, since that helper doesn't mint an expiring credential).
+- **`docs/testing-guide/adonisjs.md`** — the second worked example, same scenario ported to AdonisJS 6 (`--kit=api`): 39/39 tests green (9 unit + 30 functional), `tsc --noEmit`/ESLint clean, 100% coverage on every file the scenario touches. Confirmed AdonisJS's real test runner is **Japa**, not Jest/Vitest, and found three genuine integration bugs: Japa's request-builder assertion methods only exist on the resolved response (not chainable like supertest), a `HOST=localhost` binds IPv6 while Japa's client defaults to IPv4 (`ECONNREFUSED`), and overriding Luxon's `Settings.now` with a closure that itself calls a Luxon API recurses infinitely.
 - **`bin/casebook-back-js-init.mjs`** — scaffolder: copies `AGENTS.md`, `docs/` and `.claude/` into a target project, with a `--coverage=<1-100>` flag. Tested for real: default copy, skip-existing (without `--force`), `--coverage=90` applied cleanly, an out-of-range value rejected with exit code 1.
 
 ## How it's consumed
@@ -38,7 +40,7 @@ No installable npm package yet (no `npx casebook-back-js init` wrapper) — a na
 
 ## Status
 
-First real worked example (NestJS) run end-to-end in Docker-free Node 18 (no Docker needed here, unlike the PHP-back doctrine which had no native PHP available on its build host): 40/40 tests green, `tsc --noEmit`/ESLint clean, 98.84% line coverage. AdonisJS and Express worked examples are the natural next passes, following the same "real project, real Docker-or-native run, honestly-scoped findings" discipline as this one and the PHP-back repo's own three-stage verification.
+Two worked examples run end-to-end so far: NestJS (Docker-free, native Node 18 — 40/40 tests green, `tsc --noEmit`/ESLint clean, 98.84% line coverage) and AdonisJS 6 (via Docker, since `create-adonisjs` requires Node ≥24 — 39/39 tests green, `tsc --noEmit`/ESLint clean, 100% coverage on scenario code). Express is the natural next pass, following the same "real project, real Docker-or-native run, honestly-scoped findings" discipline.
 
 ## Contributing
 
