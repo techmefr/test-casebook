@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0
+
+- **Sixth worked example: Fastify**, same blog-idea scenario, hand-rolled auth via an `onRequest` hook and `decorateRequest`, manual Zod validation. **47/47 tests green (9 unit + 38 functional), `tsc --noEmit` clean, ESLint clean, 98.29% line coverage.** See [`docs/testing-guide/fastify.md`](docs/testing-guide/fastify.md).
+- **Real bug found and fixed, extending the tRPC/GraphQL finding**: Fastify's own `app.inject()` — an in-process request simulator that never opens a real socket — still hung under blanket `jest.useFakeTimers()`, because Fastify's internal request-lifecycle machinery depends on the same global timer functions Jest replaces. This proves the underlying hazard documented for tRPC/GraphQL is broader than "opens a real socket" — it's "the HTTP-driving mechanism's async plumbing depends on real timers," which can be true even for a framework's own fast in-process test helper. The same `doNotFake` fix applies unchanged. `AGENTS.md` Step 4 updated to state the broader rule.
+- **Documents Fastify's error-to-status convention**: its default error handler reads a thrown `Error`'s `.statusCode` property automatically, requiring no explicit `reply.code(...)` call on error paths — the most implicit convention of any framework covered so far (Nest needs `HttpException`, Express/tRPC/GraphQL all call an explicit status-setting method).
+- Added Fastify's detection row to `AGENTS.md`'s stack table, including the `decorateRequest` + `declare module 'fastify'` pattern for a typed `request.user`.
+
 ## 0.5.0
 
 - **Fifth worked example: GraphQL**, same blog-idea scenario built as an Apollo Server v4 schema/resolver pair mounted on Express, Zod business-rule validation on top of GraphQL's own schema-structural validation, a hand-rolled JWT-based context. **47/47 tests green (9 unit + 38 functional), `tsc --noEmit` clean, ESLint clean, 98.47% line coverage.** See [`docs/testing-guide/graphql.md`](docs/testing-guide/graphql.md).
