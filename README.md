@@ -8,7 +8,7 @@
 
 Most "AI, write my tests" runs stop at a few green checks on the components that were easy to reach — permissions, edge cases, and refactor-fragile selectors left untested. `test-casebook` forces an agent to plan every case from the source *before* writing anything, drive tests through dedicated `data-test-*` attributes that stay stable across refactors, and enforce strict typing and a real coverage floor.
 
-It's paired with [`env-attr-cleaner`](https://github.com/techmefr/env-attr-cleaner), which strips those `data-test-*` attributes from production builds — so the test hooks never ship. It's running in production today across 4 different Xefi business units, on both Vue/Nuxt and React codebases.
+It's paired with [`env-attr-cleaner`](https://github.com/techmefr/env-attr-cleaner), which strips those `data-test-*` attributes from production builds — so the test hooks never ship. It's running in production today across several Xefi business units, on both Nuxt and React/Next.js codebases.
 
 ## Quickstart
 
