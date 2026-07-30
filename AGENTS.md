@@ -24,6 +24,7 @@ When you finish, all of these must be true:
 5. Test coverage is **at least 80%** (lines and branches, see "Coverage floor" below) and the runner is configured to **fail below that threshold** (see Step 6).
 6. **If the cleaner was installed,** a production build contains **no** `data-test-*` attributes (verified by grep).
 7. Every **permission-gated** unit is covered by a **permission matrix** (Step 5.2) — scenario × permission state, expected from the plan, at least one *refused* state per gated capability, and every enforcement layer asserted — not a single happy-path state.
+8. If a mutation-testing tool is present (or was proposed and accepted, see Step 6bis), mutation score on permission-gated/business-critical units meets the project's threshold — a surviving mutant there means a missing case, not an acceptable gap.
 
 Work through the steps in order. Do not skip verification.
 
@@ -412,6 +413,20 @@ If the grep finds anything, the cleaner is not wired correctly — recheck Step 
 
 ---
 
+## Step 6bis — Mutation testing on gated/critical units (if present, recommended if not)
+
+Line coverage alone is gameable — a suite can hit every line while asserting nothing more specific than "didn't throw" (see the reviewer's weak-assertion check) and still show 90%+ coverage. Mutation testing re-runs the suite against deliberately broken versions of the code (a `>` flipped to `>=`, a boolean negated, a condition inverted) and reports what fraction of those mutants the suite actually kills.
+
+- **Detect** [`@stryker-mutator/core`](https://stryker-mutator.io/) (JS/TS stacks) or [`infection/infection`](https://infection.github.io/) (Laravel/Livewire) via `package.json`/`composer.json`. If absent, it's worth proposing but never install it unasked — same optional-module rule as the cleaner (Step 2).
+- **Run it scoped to permission-gated and business-critical units** identified in Step 5.0/5.2, not the whole codebase on every run:
+  ```bash
+  npx stryker run --mutate 'src/composables/**/*.ts,src/guards/**/*.ts' --thresholds.high=70 --thresholds.low=50
+  ```
+- **Thresholds**: mutation score ≥ **70%** on permission-gated/business-critical units, ≥ **50%** as a general floor elsewhere — per-project settings, like the coverage floor.
+- **A surviving mutant on a gated unit is a missing case, not noise.** It maps back to a persona/scenario the matrix (Step 5.2) didn't actually pin down — go back to Step 5.0 and add the case; don't suppress the mutant or lower the threshold.
+
+---
+
 ## Guardrails
 
 - Do **not** install or wire the cleaner without the user's explicit confirmation, and warn them its package / URL is moving to a new repo (see Step 2). The methodology (Part B) runs without it.
@@ -429,6 +444,9 @@ If the grep finds anything, the cleaner is not wired correctly — recheck Step 
 - Do **not** test a permission-gated unit under a single permission state. Build the permission matrix (Step 5.2): scenario × permission state, dense on the *refused* cells, asserting every enforcement layer. A single happy-path state is the biggest source of escaped permission bugs.
 - Do **not** compute a case's expected result from the app's own permission check and assert against it — that is circular and greens over a broken gate. The expected outcome comes from the plan / human intent.
 - Do **not** lock a permission-gated unit to one default permission state — drive the gate / permission as an input and cover the *refused* states too; if you cannot drive it at all, stop and flag it (see Step 5.2).
+- Do **not** write an assertion that would still pass if the expected value were wrong — `toBeDefined()`, `not.toBeNull()`, or "didn't throw" standing in for the real value is a weak assertion (see the reviewer's check).
+- Do **not** derive an expected value by running the component/function and copying its output — derive it from the plan/business rule (`task-test.md`), or the test's oracle is circular and will lock in a bug instead of catching one.
+- Do **not** treat a surviving mutant on a permission-gated or business-critical unit as noise — it maps to a missing case in `task-test.md` (Step 6bis).
 - Do **not** use full-DOM snapshot tests as a substitute for assertions. A `toMatchSnapshot()` over rendered markup asserts nothing meaningful, inflates coverage, and gets regenerated blindly with `-u` on every change. Assert on explicit `data-test-*` hooks and behaviour instead. (A tiny, intentional inline snapshot of one serialized value is fine; a whole-component snapshot standing in for real cases is not.)
 - Do **not** remove or rename other `data-*` attributes.
 - Do **not** attempt Angular — env-attr-cleaner cannot strip its templates (see the Angular page in the `env-attr-cleaner` repo docs).

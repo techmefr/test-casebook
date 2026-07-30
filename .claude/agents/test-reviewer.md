@@ -24,6 +24,8 @@ You are the **independent gate** on one block before it is committed. You did no
 6. **Isolation & determinism** — no real network/clock/shared state; MSW (or `Http::fake()`) fixtures typed from the real contract (a lying/drifted mock is a reject), seeded stores (or `RefreshDatabase` + factories), frozen time (`Carbon::setTestNow()` on Laravel), pinned timezone/locale.
 7. **No snapshot stand-ins** — a whole-component `toMatchSnapshot()` standing in for real assertions is a reject.
 8. **Permission matrix (gated units, Step 5.2)** — scenario × permission state present, expected taken from the plan (not computed from the app's own check — that is circular), at least one *refused* permission state per gated capability, every enforcement layer asserted, and a multi-role unit case. If the permission state could not be driven at all, that must be surfaced, not faked.
+9. **No weak assertions** — reject `expect(result).toBeDefined()`, `expect(result).not.toBeNull()`, or "didn't throw" standing in for the real check. Every assertion must pin a specific expected value (the exact rendered text/state, the exact prop, the exact emitted event payload) — if you can't state in one sentence which wrong value the assertion would still let through, it's too weak.
+10. **Oracle correctness** — the expected value in each case must come from the `task-test.md` plan / the business rule it encodes, never from running the component and copying whatever it happened to render. A test whose expected value looks reverse-engineered from the code under test locks in a bug instead of catching one — reject it and ask for the expected value to be re-derived from the plan.
 
 ## Output
 

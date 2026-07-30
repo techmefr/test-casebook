@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+- **Added mutation testing as a new optional Step 6bis**, detected via `@stryker-mutator/core` (JS/TS) or `infection/infection` (Laravel/Livewire): scoped to permission-gated/business-critical units, thresholds of 70%/50% mutation score, addressing the well-documented gap where line coverage alone lets a suite pass while asserting almost nothing (e.g. a reported 93% coverage / 34% mutation score case).
+- **Reviewer (`test-reviewer`) now explicitly rejects weak assertions** (`toBeDefined()`, `not.toBeNull()`, "didn't throw") and **checks oracle correctness** — the expected value in a test must come from the plan/business rule, never be reverse-engineered from the implementation's own output.
+- **Guardrails extended** with the corresponding "do not" rules for weak assertions, circular oracles, and ignoring surviving mutants on gated units.
+- **Noted real production usage of `env-attr-cleaner`** across several Xefi business units, and added a "Prior art" section crediting `babel-plugin-jsx-remove-data-test-id` as the closest existing precedent.
+
 ## 1.0.10
 
 - **README — warmer Contributing section.** Reframed from a bug-report checklist to an explicit invitation: contributions are welcome, no permission or big change needed, small fixes count. Added a fifth idea (share a worked example, pointing at the Laravel permission-matrix example as the template) and closed with "don't let an imperfect PR stop you from opening it."
