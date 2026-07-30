@@ -8,7 +8,7 @@
 
 Most "AI, write my tests" runs stop at a few green checks on the components that were easy to reach — permissions, edge cases, and refactor-fragile selectors left untested. `test-casebook` forces an agent to plan every case from the source *before* writing anything, drive tests through dedicated `data-test-*` attributes that stay stable across refactors, and enforce strict typing and a real coverage floor.
 
-It's paired with [`env-attr-cleaner`](https://github.com/techmefr/env-attr-cleaner), which strips those `data-test-*` attributes from production builds — so the test hooks never ship.
+It's paired with [`env-attr-cleaner`](https://github.com/techmefr/env-attr-cleaner), which strips those `data-test-*` attributes from production builds — so the test hooks never ship. It's running in production today across several Xefi business units: Nuxt/Vue (Nexeren, StackTim, Skera), React (a separate BU), and Omnysis (another BU still).
 
 ## Quickstart
 
@@ -52,6 +52,10 @@ Full walkthrough, including the permission-matrix (roles + a private article) it
 ## Get involved
 
 **Contributions are very welcome — this doctrine only gets sharper by running into real projects.** No permission or big change needed: a one-line fix, a missing case, a new guide all count — see [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## Prior art
+
+Stripping test attributes at build time isn't new — [`babel-plugin-jsx-remove-data-test-id`](https://www.npmjs.com/package/babel-plugin-jsx-remove-data-test-id) is the closest thing to a de facto standard (React/Babel only), and smaller Vite-plugin variants exist for Vue and Svelte individually. What `env-attr-cleaner` adds is breadth: one tool across Nuxt/Vue/React/Next.js/Svelte/Astro/Bun and Vite/Rollup/Webpack/esbuild, instead of picking a new plugin per framework/bundler pair.
 
 ## Core idea
 
