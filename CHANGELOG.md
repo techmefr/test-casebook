@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0
+
+- **The scaffolder now checks for a newer published version** on `init`, against the npm registry (`registry.npmjs.org`), with a 1.5s timeout and silent failure if offline or unreachable — never blocks or errors the run. Prints an update hint (current -> latest, and the `npm i -D` command) when one exists.
+
 ## 1.1.0
 
 - **Added mutation testing as a new optional Step 6bis**, detected via `@stryker-mutator/core` (JS/TS) or `infection/infection` (Laravel/Livewire): scoped to permission-gated/business-critical units, thresholds of 70%/50% mutation score, addressing the well-documented gap where line coverage alone lets a suite pass while asserting almost nothing (e.g. a reported 93% coverage / 34% mutation score case).

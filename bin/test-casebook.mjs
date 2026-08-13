@@ -19,6 +19,43 @@ const args = process.argv.slice(2);
 const command = args[0];
 const force = args.includes("--force");
 
+const { name: PKG_NAME, version: PKG_VERSION } = JSON.parse(
+  readFileSync(join(pkgRoot, "package.json"), "utf8"),
+);
+
+function isNewer(a, b) {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] || 0) > (pb[i] || 0)) return true;
+    if ((pa[i] || 0) < (pb[i] || 0)) return false;
+  }
+  return false;
+}
+
+async function checkForUpdate() {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1500);
+    const res = await fetch(`https://registry.npmjs.org/${PKG_NAME}/latest`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return;
+    const { version: latest } = await res.json();
+    if (latest && isNewer(latest, PKG_VERSION)) {
+      console.log(
+        `\nA newer version of ${PKG_NAME} is available: ${PKG_VERSION} -> ${latest}.`,
+      );
+      console.log(
+        `Update with: npm i -D ${PKG_NAME}@latest (or bump the pin and rerun "npx ${PKG_NAME} init --force").`,
+      );
+    }
+  } catch {
+    // offline or registry unreachable: stay silent, never block the scaffolder
+  }
+}
+
 const DEFAULT_COVERAGE = 80;
 const coverageArg = args.find((a) => a.startsWith("--coverage="));
 let coverage = DEFAULT_COVERAGE;
@@ -163,7 +200,7 @@ function scaffoldRootPointers(results) {
   }
 }
 
-function init() {
+async function init() {
   const copied = [];
   const skipped = [];
   for (const asset of ASSETS) {
@@ -203,6 +240,7 @@ function init() {
   console.log(
     `     then wire it per the env-attr-cleaner repo's docs/frameworks.\n`,
   );
+  await checkForUpdate();
 }
 
 function usage() {
@@ -218,5 +256,5 @@ function usage() {
   );
 }
 
-if (command === "init") init();
+if (command === "init") await init();
 else usage();
