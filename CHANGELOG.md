@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+- **No content change.** End-to-end smoke test of the automated publish pipeline (`.github/workflows/publish.yml`): this version bump was merged through a normal PR to confirm CI publishes on its own.
+
 ## 1.2.0
 
 - **The scaffolder now checks for a newer published version** on `init`, against the npm registry (`registry.npmjs.org`), with a 1.5s timeout and silent failure if offline or unreachable — never blocks or errors the run. Prints an update hint (current -> latest, and the `npm i -D` command) when one exists.
