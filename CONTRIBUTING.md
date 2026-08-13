@@ -11,3 +11,7 @@ Ideas for where to start:
 - **Share a worked example.** The Laravel guide's permission-matrix example (roles + a private article, run for real, 28/28 green) started as exactly this kind of contribution.
 
 No process beyond that: fork, branch, PR against `main`. Mention what you verified it against (a real running project beats reasoning from the docs) so reviewers can move fast — but don't let an imperfect PR stop you from opening it.
+
+## Releasing (maintainers)
+
+Publishing is automated. Bump `version` in `package.json`, add the matching entry to `CHANGELOG.md`, and open a PR against `main` — once it's merged, CI publishes that version to npm on its own (`.github/workflows/publish.yml`), by comparing `package.json`'s version against what's currently on the registry. Nothing to run by hand, and nothing publishes if the version didn't change.
