@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Stacks covered](https://img.shields.io/badge/stacks%20covered-7-brightgreen.svg)](#supported-stacks-auto-detected)
-[![Status](https://img.shields.io/badge/status-pre--release-orange.svg)](#status)
+[![npm](https://img.shields.io/npm/v/test-casebook.svg)](https://www.npmjs.com/package/test-casebook)
 
 **A playbook that stops an AI from writing happy-path-only tests for your frontend.**
 
@@ -81,12 +81,10 @@ Story → **`test-task` skill** (PM) writes one `test-task.md` → given to the 
 Three channels, one source of truth (this repo's `AGENTS.md` + docs):
 
 - **Claude Code skill + sub-agents** — the primary path, shown in Quickstart.
-- **npx scaffolder** — `npx test-casebook init [--force]`.
+- **npx scaffolder** — `npx test-casebook init [--force]`, which also checks the npm registry for a newer published version and prints an update hint if one exists (silent, non-blocking, if offline).
 - **Docs directly** — the guides in `docs/`.
 
-## Status
-
-Pre-release (not yet published to npm). Usable today via the Claude Code skill, the scaffolder (`node bin/test-casebook.mjs init`), or by handing `AGENTS.md` to any agent; marketplace packaging is in progress.
+Releases are automated: merging a PR to `main` that changes `package.json`'s version triggers CI to publish that version to npm (see `CONTRIBUTING.md`).
 
 ## Same doctrine, other stacks
 
